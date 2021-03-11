@@ -1,6 +1,27 @@
 # #+TITLE: Development logs, problems etc
 * Problems
   Listed here is everything I havent managed to ponder upon or fix yet
+  
+* Links
+  - [[https://stackoverflow.com/questions/8097620/how-to-read-from-input-until-newline-is-found-using-scanf][read until eol]]
+  - [[https://stackoverflow.com/questions/5406935/reading-a-string-with-scanf/5407121][strings with scanf]]
+  - [[https://stackoverflow.com/questions/1428911/detecting-eof-in-c][eof detection]]
+  - [[https://en.wikipedia.org/wiki/Include_guard#File_"grandparent.h"][inclu guards]]
+  - [[https://stackoverflow.com/questions/5607455/checking-that-malloc-succeeded-in-c][malloc failure]] -- *what to do then??*
+  - [[https://www.cplusplus.com/reference/cstdio/scanf/][scanf docs]]
+  - [[https://unix.stackexchange.com/questions/239088/insert-result-of-command-into-an-executable-one-command][command res into an exec]]
+  - [[https://man7.org/linux/man-pages/man3/getline.3.html][getline and getdelim]]
+  - [[http://www.cplusplus.com/reference/cstdlib/strtoul/][stroul -- str to uns long]]
+  - [[https://stackoverflow.com/questions/19894483/is-there-any-difference-in-using-f-e-g-e-or-g-with-scanf][float flags scanf: %{f, g, G, a}]]
+  - [[https://stackoverflow.com/questions/46195980/sscanfs-u-v-matching-signed-integers][scanf + signs]]
+  - [[https://stackoverflow.com/questions/14802970/sscanf-with-hexadecimal-negative-value][negative hex vals]]
+  - [[https://stackoverflow.com/questions/5796983/checking-if-float-is-an-integer][check if a float is an int]]
+  - [[https://en.cppreference.com/w/c/numeric/math/ceil][ceil, ceilf, ceill docs]]
+  - [[https://en.wikipedia.org/wiki/Scanf_format_string#Format_string_specifications][format str specifications]]
+  - [[https://stackoverflow.com/a/840504][function ptr]]
+  - [[https://www.geeksforgeeks.org/comparator-function-of-qsort-in-c/][casting voids + qsort]]
+  - [[https://stackoverflow.com/a/27284318][qsort]]
+  - [[https://stackoverflow.com/a/21097376][how does strtok work?]]
 
 * Modules
   Keep it simple. Module ~m~ is ~m.c~ + ~m.h~. 
@@ -96,4 +117,68 @@
 ***** Would it werkk?
       Can I save result from ~sscanf(s, any_format, &some_long_long_var)~ under really any long long
       variable and only then /type it back/ in the ~add~ func?
-      
+***** Parse polymorphicallly a string...
+      idk if that'd hold up since a *string is scanffed differentely than anything else*
+      + strings have unnknown size. well perhaps the way is to scan it char wise.
+      + so i can have multiple chars in there
+      + with a separator of my choosing
+      + hence that'd be the beg of a ~sig~
+***** code
+      #+begin_src C
+        /* POLYMORPHIC VARIANT */
+
+        int try_polymorphic(PLine* pline, const char* s, const char* format,
+                            void(*add)(PLine*, void*))
+        {
+          char val[256];
+
+          if (sscanf(s, format, &val)) {
+            add(pline, &val);
+            return 1;
+          } else
+            return 0;
+        }
+
+        void add_parsed_int(PLine* pline, void * val)
+        {
+          long long num = *(long long *)val;
+          pline->ints.used++;
+          if (pline->ints.used >= pline->ints.len) {
+            pline->ints.val = (long long *)realloc(pline->ints.val,pline->ints.len * sizeof(long long));
+    
+            if (!pline->ints.val)
+              fprintf(stderr, "REALLOC FAILURE");
+          }
+          pline->ints.val[pline->ints.used - 1] = num;
+        }
+
+        void add_parsed_float(PLine* pline, void * val)
+        {
+          double num = *(double *)val;
+          pline->floats.used++;
+          if (pline->floats.used >= pline->floats.len) {
+            pline->floats.val = (double *)realloc(pline->floats.val,pline->floats.len * sizeof(double));
+    
+            if (!pline->floats.val)
+              fprintf(stderr, "REALLOC FAILURE");
+          }
+          pline->floats.val[pline->floats.used - 1] = num;
+        }
+
+        void add_parsed_string(PLine* pline, void * val)
+        {
+          char* str = *(char** )val;
+          pline->nans.used++;
+          /* etc */
+        }
+
+        int try_parse(PLine* pline, const char* s)
+        {
+          if (try_polymorphic(pline, s, "%i", add_parsed_int) ||
+              try_polymorphic(pline, s, "%f", add_parsed_float) ||
+              try_polymorphic(pline, s, "%g", add_parsed_float) ||
+              try_polymorphic(pline, s, "%G", add_parsed_float) ||
+              try_polymorphic(pline, s, "%s", add_parsed_string) ||)
+
+        }
+      #+end_src

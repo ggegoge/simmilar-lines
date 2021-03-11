@@ -17,7 +17,7 @@ void append_ints(DInts*, long long new_num);
 
 typedef struct dyn_floats {
   size_t used, len;
-  long long* val;
+  double* val;
 } DFloats;
 
 void append_floats(DFloats**, double new_num);
@@ -33,9 +33,12 @@ typedef struct parsed_line {
 /* void add_parsed_int(PLine, long long);
  * void add_parsed_float(PLine, double);
  * void add_parsed_string(PLine, char*); */
-void add_parsed_int(PLine, void*);
-void add_parsed_float(PLine, void*);
-void add_parsed_string(PLine, void*);
+
+/* polymorphic version: */
+
+/* void add_parsed_int(PLine, void*);
+ * void add_parsed_float(PLine, void*);
+ * void add_parsed_string(PLine, void*); */
 
 
 PLine parse(DLine);
