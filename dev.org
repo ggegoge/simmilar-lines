@@ -1,0 +1,99 @@
+# #+TITLE: Development logs, problems etc
+* Problems
+  Listed here is everything I havent managed to ponder upon or fix yet
+
+* Modules
+  Keep it simple. Module ~m~ is ~m.c~ + ~m.h~. 
+
+** module list
+*** ~input~
+*** ~parse~
+*** ~main~
+
+    
+* Input
+  All the input reading shall be done in the ~input~  module. I have two types decalared there
+****   ~struct dyn_text~ vel *DText*
+     A dynamic array storing lines of *DLine* type
+**** ~struct dyn_line~ vel *DLine*
+     Big strings allocated in a dynamic manner
+     Expansion coeff -- ~input.h~ and the const ~EXPAND_ARR~
+
+** procedure
+   1. ~read_text~ reads everything from ~stdin~
+   2. ~read_line~ reads single lines
+
+
+* Parse
+  Parsing is in the ~parse~ module obviously. How should it be done?
+
+  I take raw *DLines* and translate them into neat & tidy *PLines*
+  a *PLine* should consist of
+***** all the ints
+***** all the floats
+***** all the nans
+
+** Parsing different things  
+*** Word splitting
+    I shoudl use ~strtok~ from C stdlib. It is a little bit /strange/ but as far as I understand it
+    the process is something like:
+    
+    1. you call ~strtok~ with a +string+ ~char*~,
+    2. you give it delims (in my case this shall be whitespace),
+    3. it replaces the delims with ~\0~ and points you at the begg of another string. Then you can
+       use std string procedures on it cause for C sth like ~_char*_ + \0~ is as close to a string
+       as u get
+
+    Bettr described [[https://stackoverflow.com/questions/21097253/how-does-the-strtok-function-in-c-work][here]]
+*** Parsing those single words/strings
+    I have come up with two approaches 
+**** ~try_type~
+     I define ~try_float~, ~try_int~ etc, then they call ~try_fromat_type~ with different format
+     strings each for different kind of ~type~ of theirs. So
+
+     ~try_int~ would get the *PLine* to edit, string to parse
+     It would do sth like
+     #+begin_src C
+       if (try_format_int("%x", ...) || try_format_int("%o", ...) || ...)
+           return 1;
+       else
+         return 0;
+     #+end_src
+     so try to parse it with different format strings.
+
+     Each ~try_format~ would consist of a ~sscanf~ and (if succesfull) it'd append it to *PLine*
+     ~type~ drawer.
+**** ~try_polymorphic~
+     Messing with polymorphism in C...
+
+     So there'd be single ~try_poly~ func that would get four things:
+
+     1. *PLine*
+     2. string to parse
+     3. format
+     4. function that'd add the result to *PLine*
+
+     It would try to scanf it with the appriopriate format and then save the result under any type
+     basically but try to send it back and save inside *PLine* with the ~add~ function
+
+     The ~add~ would be sth like
+
+     =void(*add)(PLine, void *)=
+     Why? Welllllll so as i can get /any type/ in ~poly_try~ I cannot send anything specific to the
+     add func but a pointer to the result of scanf. So it would need to be ~void*~. But then I can
+     cast it as I see fit.
+
+     eg
+     #+begin_src C
+       void add_int(PLine pl, void* val)
+       {
+         int real_val = *(int*)val;
+         /* add it somehau */
+         add_int(pl.ints, real_val);
+       }
+     #+end_src
+     Ofc i can keep add as one func that manages all of that
+***** Would it werkk?
+      Can I save result from ~sscanf(s, any_format, &some_long_long_var)~ under really any long long
+      variable and only then /type it back/ in the ~add~ func?
+      

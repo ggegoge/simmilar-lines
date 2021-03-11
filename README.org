@@ -1,0 +1,4 @@
+#+TITLE: Wierszarz
+
+Pierwsze zadanie na IPP.
+Polecenie w pliku [[file:polecenie.org][polecenie.org]], szkopuły w [[file:pytania.org][pytania.org]].
