@@ -12,7 +12,8 @@
 
 size_t new_len(size_t curr_len)
 {
-  return (size_t) ceil(curr_len * ARR_EXPAND);
+  return ((size_t)curr_len + (curr_len >> 2) + 6) & ~(size_t)3;
+  /* return (size_t) ceil(curr_len * ARR_EXPAND); */
 }
 
 int append_to_line(DLine* line, char new_char)
