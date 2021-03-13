@@ -18,27 +18,28 @@
 
 typedef struct dyn_line {
   size_t used, len, line_num;
+  int commentary, initialised;
   char* val;
 } DLine;
 
-typedef struct dyn_text {
-  size_t used, len;
-  DLine* val;
-} DText;
+/* typedef struct dyn_text {
+ *   size_t used, len;
+ *   DLine* val;
+ * } DText; */
 
 
 /* new struct initialisation */
-DLine new_line(size_t, size_t);
-DText new_text(size_t);
+DLine init_line(size_t, size_t);
 
+
+#include "parse.h"
 /**
  *  reads text from stdin and packs it into a DText dynamic array
  */
-DText read_text();
+int read_text(PText*);
 
 /**
- *  Frees the memory used by @text and every line contained there 
+ *  Frees the memory used by @text and every line contained there
  */
-void free_text(DText text);
 
 #endif /* INPUT_H */

@@ -1,5 +1,5 @@
-#ifndef PARSE_H
-#define PARSE_H
+#ifndef POLY_PARSE_H
+#define POLY_PARSE_H
 
 #include <stdlib.h>
 
@@ -26,33 +26,23 @@ void append_floats(DFloats**, double new_num);
  * First read as str and get the lenght? not feasible I'm afraid. ugh */
 
 typedef struct parsed_line {
-  size_t line_num;
-  int alloc_stat, well_formed;
+  size_t line_num;  
   char* sig;
   DInts ints;
   DFloats floats;
   char* nans;
 } PLine;
 
-typedef struct parsed_text {
-  size_t used, len;
-  PLine* val;
-} PText;
+/* polymorphic version: */
 
+#define CHUNK_SIZE sizeof(long long)
 
-int add_parsed_int(PLine*, long long);
-int add_parsed_float(PLine*, double);
-int add_parsed_string(PLine*, char*);
-
-int add_parsed_line(PText*, PLine);
-
-void free_text(PText);
-
-void error(size_t);
+void add_parsed_int(PLine*, void*);
+void add_parsed_float(PLine*, void*);
+void add_parsed_string(PLine*, void*);
 
 
 #include "input.h"
 PLine parse(DLine);
 
-
-#endif /* PARSE_H */
+#endif /* POLY_PARSE_H */

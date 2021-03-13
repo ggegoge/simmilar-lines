@@ -2,6 +2,7 @@
 * Problems
   Listed here is everything I havent managed to ponder upon or fix yet
   
+
 * Links
   - [[https://stackoverflow.com/questions/8097620/how-to-read-from-input-until-newline-is-found-using-scanf][read until eol]]
   - [[https://stackoverflow.com/questions/5406935/reading-a-string-with-scanf/5407121][strings with scanf]]
@@ -23,6 +24,7 @@
   - [[https://stackoverflow.com/a/27284318][qsort]]
   - [[https://stackoverflow.com/a/21097376][how does strtok work?]]
 
+
 * Modules
   Keep it simple. Module ~m~ is ~m.c~ + ~m.h~. 
 
@@ -32,17 +34,44 @@
 *** ~main~
 
     
+* Main
+  *everything returns an int* -- so that  each memory problem is documented by the integer exit code
+   so i can end everything if such problem occurs
+**   the order of proceeding
+   1. i create an initial array for parsed text in which I ll store all parsed lines. this i get from
+      the ~parse~ module
+   2. i call ~input~. it reads every line, calls ~parse~ on each of them and the parsed line gets added to
+      the initial array for parsed text
+      - I deal with the parsed line in a particular way
+   3. having all lines safely parsed in the PText, I can proceed to sorting it
+      - custom comparator
+   4. having al of them sorted it is easy to find the identical ones
+
 * Input
-  All the input reading shall be done in the ~input~  module. I have two types decalared there
+
+** how we do it now
+   In the input module (perhaps i shoudl change the name) I read data from stdin but then I dont
+   save each line (which involves a lot of copying etc) but rather I have one dynamic line of
+   ~DLine~ type which serves me as the main buffer for each line.
+
+   when called it gets a *ptext* array to store the parsed text in
+
+   After having loaded a single line it calls *parse* module's ~parse~ procedure to parse the read
+   line which then gets added to the ptext
+
+   
+   
+** +old vers+
+   All the input reading shall be done in the ~input~  module. I have two types decalared there
 ****   ~struct dyn_text~ vel *DText*
      A dynamic array storing lines of *DLine* type
 **** ~struct dyn_line~ vel *DLine*
      Big strings allocated in a dynamic manner
      Expansion coeff -- ~input.h~ and the const ~EXPAND_ARR~
 
-** procedure
-   1. ~read_text~ reads everything from ~stdin~
-   2. ~read_line~ reads single lines
+*** procedure
+    1. ~read_text~ reads everything from ~stdin~
+    2. ~read_line~ reads single lines
 
 
 * Parse
@@ -53,7 +82,7 @@
 ***** all the ints
 ***** all the floats
 ***** all the nans
-
+*** The order
 ** Parsing different things  
 *** Word splitting
     I shoudl use ~strtok~ from C stdlib. It is a little bit /strange/ but as far as I understand it
@@ -123,6 +152,13 @@
       + so i can have multiple chars in there
       + with a separator of my choosing
       + hence that'd be the beg of a ~sig~
+
+***** ok, this is not the best idea. *heres why*
+      so i have to keep both each number and each *nan* separately. why? only then i can be sure
+      whether a line is or isnt simmilar.
+
+      hence the scanf-ing is not so straightforward.
+      
 ***** code
       #+begin_src C
         /* POLYMORPHIC VARIANT */
@@ -182,3 +218,19 @@
 
         }
       #+end_src
+
+
+* Form sigs/sort
+  I'll have (for each pline) arrays of ints, floats and strings. So then I can either pump
+  everything into the ~sig~ string or I can qsort all the plines with a comparator of sorts.
+
+  Lets have all the arrays stored inside sorted beforehand.
+  
+** cus cmp
+   How to compare them?
+   ~pl1~ and ~pl2~. if ~pl1.ints.length > ~pl2.ints.length~ then ~pl1 > pl2~.
+   If lengths eq, then check each idx. When there's a diff, then return the bigger as bigger
+
+   same with strings but strcmp there. ugghhhhhhhhhh a lot of /rzeźba/ all around here. me not likey
+
+   tiresome

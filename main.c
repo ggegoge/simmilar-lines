@@ -2,19 +2,15 @@
 #include <math.h>
 
 #include "input.h"
+#include "parse.h"
 
 int main(void)
 {
-  DText text;
-  size_t i, j;
+  PText text;
+
 
   printf("Wpisz rzeczy:\n");
-  text = read_text();
-  for (i = 0; i < text.used; i++) {
-    for (j=0; j < text.val[i].used; j++)
-      printf("%c", text.val[i].val[j]);
-    printf("\n");
-  }
+  read_text(&text);
   free_text(text);
   
   return 0;
