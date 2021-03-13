@@ -49,15 +49,14 @@ DLine init_line(size_t init_len, size_t line_num)
   return line;
 }
 
-int read_line(size_t line_num, DLine* line)
+bool read_line(size_t line_num, DLine* line)
 {
-  int alloc_status = 0;
   char c;
-
+  bool alloc_status;
   line->line_num = line_num;
 
   if (scanf("%c", &c) != 1)
-    return alloc_status;
+    return false;
 
   if (c == '#') {
     printf("to jest kom\n");
@@ -65,7 +64,7 @@ int read_line(size_t line_num, DLine* line)
 
     while (scanf("%c", &c) == 1 && c != '\n');
 
-    return alloc_status;
+    return true;
   } else
     printf("fisrt char is: %c\n", c);
 
@@ -75,46 +74,4 @@ int read_line(size_t line_num, DLine* line)
            !feof(stdin));
 
   return alloc_status;
-}
-
-
-int read_text(PText* ptext)
-{
-  int read_code, parse_code;    /* check if no memory problems on the way */
-  size_t lin_num = 1;
-  DLine line = init_line(INIT_ARR_SIZE, lin_num);
-  PLine pline;
-
-  if (line.initialised == -1)
-    return -1;
-
-  if (line.val == NULL)
-    return -1;
-
-  while (!feof(stdin)) {
-    read_code = read_line(lin_num, &line);
-
-    if (read_code == -1)
-      return read_code;
-
-    printf("line.commentary = %d\n", line.commentary);
-
-    if (line.commentary != 1) {
-      pline = parse(line);
-      parse_code = pline.alloc_stat;
-
-      if (pline.well_formed)
-        add_parsed_line(ptext, pline);
-
-      if (parse_code == -1)
-        return -1;
-    }
-
-    line.used = 0;
-    line.commentary = 0;
-    ++lin_num;
-  }
-
-  free(line.val);
-  return 1;
 }

@@ -2,8 +2,9 @@
 #define INPUT_H
 
 #include <stdlib.h>
+#include <stdbool.h>
 
-#define INIT_ARR_SIZE 2137
+#define INIT_ARR_SIZE 16
 #define ARR_EXPAND 1.25
 
 
@@ -15,6 +16,9 @@
  * @line_num -- only with DLine, the line number,
  * @val -- the actual array. acces elts by `arr.val[i]`,
  */
+
+
+size_t new_len(size_t);
 
 typedef struct dyn_line {
   size_t used, len, line_num;
@@ -31,12 +35,10 @@ typedef struct dyn_line {
 /* new struct initialisation */
 DLine init_line(size_t, size_t);
 
-
-#include "parse.h"
 /**
  *  reads text from stdin and packs it into a DText dynamic array
  */
-int read_text(PText*);
+bool read_line(size_t, DLine*);
 
 /**
  *  Frees the memory used by @text and every line contained there

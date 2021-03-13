@@ -2,6 +2,9 @@
 #define PARSE_H
 
 #include <stdlib.h>
+#include <stdbool.h>
+
+#include "input.h"
 
 /* moduł do parse'owania */
 
@@ -11,14 +14,20 @@ typedef struct dyn_ints {
   long long* val;
 } DInts;
 
-void append_ints(DInts*, long long new_num);
+/* void append_ints(DInts*, long long new_num); */
 
 typedef struct dyn_floats {
   size_t used, len;
   double* val;
 } DFloats;
 
-void append_floats(DFloats**, double new_num);
+
+typedef struct dyn_strs {
+  size_t used, len;
+  char** val;
+} DStrs;
+
+/* void append_floats(DFloats**, double new_num); */
 
 /* i'll store nonnumericals as a string? idk...
  * thats not the best idea tbf. I have to be able to distinguish those single
@@ -31,7 +40,7 @@ typedef struct parsed_line {
   char* sig;
   DInts ints;
   DFloats floats;
-  char* nans;
+  DStrs nans;
 } PLine;
 
 typedef struct parsed_text {
@@ -40,18 +49,27 @@ typedef struct parsed_text {
 } PText;
 
 
-int add_parsed_int(PLine*, long long);
-int add_parsed_float(PLine*, double);
-int add_parsed_string(PLine*, char*);
+/* parsing */
+bool try_int(const char*, PLine*);
+bool try_float(const char*, PLine*);
+bool try_str(const char*, PLine*);
 
-int add_parsed_line(PText*, PLine);
 
+/* adding any of the types to the array in PLine */
+bool add_parsed_int(PLine*, long long);
+bool add_parsed_float(PLine*, double);
+bool add_parsed_string(PLine*, char*);
+
+/* add one PLine to PText */
+bool add_parsed_line(PText*, PLine);
+
+/* initialisation and freeing of the PText */
+PText init_ptext();
 void free_text(PText);
 
 void error(size_t);
 
 
-#include "input.h"
 PLine parse(DLine);
 
 

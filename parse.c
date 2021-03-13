@@ -11,26 +11,47 @@ PLine parse(DLine dline)
   pline.alloc_stat = 1;
   pline.well_formed = 1;
   pline.line_num = dline.line_num;
-  printf("parsing line #%lu", pline.line_num);
+  printf("parsing line #%lu ", pline.line_num);
 
   for (i = 0; i < dline.used; i++)
     printf("%c", dline.val[i]);
-
+  
   return pline;
+}
+
+PText init_ptext()
+{
+  PText pt;
+  pt.len = INIT_ARR_SIZE;
+  pt.used = 0;
+  pt.val = (PLine*) malloc(INIT_ARR_SIZE * sizeof(PLine));
+  return pt;
 }
 
 void free_text(PText text)
 {
-  /* free(text.val); */
-  return;
+  if (text.val != NULL) {
+    free(text.val);
+    text.val = NULL;
+  }
 }
 
-int add_parsed_line(PText* ptext, PLine pline)
+bool add_parsed_line(PText* ptext, PLine pline)
 {
-  return 1;
+  ptext->used++;
+
+  if (ptext->used >= ptext->len) {
+    ptext->val = (PLine*) realloc(ptext->val, new_len(ptext->len));
+
+    if (ptext->val == NULL)
+      return false;
+  }
+
+  ptext->val[ptext->used - 1] = pline;
+  return true;
 }
 
-int add_parsed_float(PLine* pline, double num)
+bool add_parsed_float(PLine* pline, double num)
 {
   pline->floats.used++;
 
@@ -39,14 +60,14 @@ int add_parsed_float(PLine* pline, double num)
                                           pline->floats.len * sizeof(double));
 
     if (pline->floats.val == NULL)
-      return -1;
+      return false;
   }
 
   pline->floats.val[pline->floats.used - 1] = num;
-  return 1;
+  return true;
 }
 
-int add_parsed_int(PLine* pline, long long num)
+bool add_parsed_int(PLine* pline, long long num)
 {
   pline->ints.used++;
 
@@ -55,60 +76,28 @@ int add_parsed_int(PLine* pline, long long num)
                                            pline->ints.len * sizeof(long long));
 
     if (pline->ints.val == NULL)
-      return -1;
+      return false;
   }
 
   pline->ints.val[pline->ints.used - 1] = num;
-  return 1;
+  return true;
 }
 
-int add_parsed_string(PLine* pline, char* str)
+bool add_parsed_string(PLine* pline, char* str)
 {
-  return 1;
+  pline->nans.used++;
+
+  if (pline->nans.used >= pline->nans.len) {
+    pline->nans.val = (char**) realloc(pline->nans.val, new_len(pline->floats.len));
+
+    if (pline->nans.val == NULL)
+      return false;
+  }
+
+  pline->nans.val[pline->nans.used - 1] = str;
+  return true;
 }
 
 
-
-int try_int_format(PLine* pline, const char* s, const char* format)
-{
-  unsigned long long num;
-
-  if (sscanf(s, format, &num) == 1) {
-    add_parsed_int(pline, (long long) num);
-    return 1;
-  } else
-    return 0;
-}
-
-int try_int(PLine* pline, const char* s)
-{
-  if (try_int_format(pline, s, "%lli"))
-    return 1;
-  else
-    return 0;
-}
-
-int try_float_format(PLine* pline, const char* s, const char* format)
-{
-  double num;
-
-  if (sscanf(s, format, &num)) {
-    add_parsed_float(pline, (double)num);
-    return 1;
-  } else
-    return 0;
-}
-
-
-int try_float(PLine* pline, const char* s)
-{
-  if (try_float_format(pline, s, "%lg") || try_float_format(pline, s, "%lG") ||
-      try_float_format(pline, s, "%llf"))
-    return 1;
-  else
-    return 0;
-}
-
-int try_string();
 
 
