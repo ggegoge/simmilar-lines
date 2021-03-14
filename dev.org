@@ -29,6 +29,7 @@
   Keep it simple. Module ~m~ is ~m.c~ + ~m.h~. 
 
 ** module list
+*** ~group~
 *** ~input~
 *** ~parse~
 *** ~main~
@@ -219,6 +220,8 @@
         }
       #+end_src
 
+
+* Group
 
 * Form sigs/sort
   I'll have (for each pline) arrays of ints, floats and strings. So then I can either pump
