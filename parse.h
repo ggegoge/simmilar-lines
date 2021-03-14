@@ -6,9 +6,35 @@
 
 #include "input.h"
 
+/* the range of acceptable ascii chars */
+#define MIN_WORD_ASCII 33
+#define MAX_WORD_ASCII 126
+
 /* moduł do parse'owania */
 
 
+typedef struct whole {
+  unsigned long long abs;
+  enum { PLUS, MINUS } sign;
+} Whole;
+
+
+struct dyn_wholes {
+  size_t used, len;
+  Whole* val;
+};
+
+struct dyn_reals {
+  size_t used, len;
+  double* val;
+};
+
+struct dyn_nans {
+  size_t used, len;
+  char** val;
+};
+
+/* old structs... */
 typedef struct dyn_ints {
   size_t used, len;
   long long* val;
@@ -38,10 +64,20 @@ typedef struct parsed_line {
   size_t line_num;
   bool well_formed;
   char* sig;
+  struct dyn_wholes wholes;
+  struct dyn_reals reals;
+  struct dyn_nans nans;
+} PLine;
+
+
+typedef struct parsed_line_old {
+  size_t line_num;
+  bool well_formed;
+  char* sig;
   DInts ints;
   DFloats floats;
   DStrs nans;
-} PLine;
+} PLine_old;
 
 typedef struct parsed_text {
   size_t used, len;
@@ -49,26 +85,44 @@ typedef struct parsed_text {
 } PText;
 
 
-/* parsing */
-bool try_int(const char*, PLine*);
-bool try_float(const char*, PLine*);
-bool try_str(const char*, PLine*);
-
-
-/* adding any of the types to the array in PLine */
-void add_parsed_int(PLine*, long long);
-void add_parsed_float(PLine*, double);
-void add_parsed_string(PLine*, char*);
-
-/* add one PLine to PText */
-void add_parsed_line(PText*, PLine);
-
 /* initialisation and freeing of the PText */
 PText init_ptext();
 void free_text(PText);
 
-void error(size_t);
+/* parse single line */
+PLine parseln(char*, size_t);
 
-PLine parse(char*, size_t);
+/* check wheter all chars in a word stay in the ascii range of [33, 126] */
+bool check_word(char*, size_t);
+
+/* parsing */
+void parse(PLine*, const char*);
+
+/* a parser for each type -- long long, unsinged long long, double, string */
+/* lovely names: */
+bool parsell(PLine*, const char*);
+bool parseull(PLine*, const char*);
+bool parsed(PLine*, const char*);
+bool parsestr(PLine, const char*);
+
+
+/* hideous names: */
+bool parse_whole(PLine*, const char*);
+bool parse_real(PLine*, const char*);
+bool parse_nan(PLine*, const char*);
+
+/* adding any of the types to the array in PLine */
+/* void add_parsed_int(PLine*, long long);
+ * void add_parsed_float(PLine*, double);
+ * void add_parsed_string(PLine*, char*); */
+
+/* adding any of the types to the array in PLine */
+void add_parsed_whole(PLine*, Whole);
+void add_parsed_real(PLine*, double);
+void add_parsed_nan(PLine*, char*);
+
+
+/* add one PLine to PText */
+void add_parsed_line(PText*, PLine);
 
 #endif /* PARSE_H */
