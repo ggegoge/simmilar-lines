@@ -10,7 +10,7 @@ typedef struct group {
   size_t* idxs;
 } Group;
 
-bool write_groups(PText);
+void write_groups(PText);
 
 
 #endif /* GROUP_H */

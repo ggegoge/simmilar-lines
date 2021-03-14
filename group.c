@@ -3,7 +3,7 @@
 #include "group.h"
 
 
-bool write_groups(PText t)
+void write_groups(PText t)
 {
-  return true;
+  ;
 }
