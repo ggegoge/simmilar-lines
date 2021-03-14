@@ -10,12 +10,6 @@
  * into dynamic arrays DText and DLine
  */
 
-size_t new_len(size_t curr_len)
-{
-  return ((size_t)curr_len + (curr_len >> 2) + 6) & ~(size_t)3;
-  /* return (size_t) ceil(curr_len * ARR_EXPAND); */
-}
-
 /**
  *  read the current line up to the '\n' or EOF.
  *  if it is a comment line (ie starts with '#') then move to the end without
@@ -32,8 +26,9 @@ void readln(char** line_ptr, size_t* len, bool* is_eof, bool* is_comm)
 
   if ((*is_comm = c == '#')) {
     /* move to the eol (eof if no eol) */
-    while (!feof(stdin) && getc(stdin) != '\n');
-
+    printf("istotnie, komentarz\n");
+    while (!feof(stdin) && (c = getc(stdin)) != '\n');
+    printf("char teraz: %c", c);
   }
 
   ungetc(c, stdin);
