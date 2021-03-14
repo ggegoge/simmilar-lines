@@ -1,21 +1,38 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "parse.h"
 #include "input.h"
 
-PLine parse(DLine dline)
-{
-  PLine pline;
-  size_t i;
+/* PLine parse(DLine dline)
+ * {
+ *   PLine pline;
+ *   size_t i;
+ * 
+ *   pline.alloc_stat = 1;
+ *   pline.well_formed = 1;
+ *   pline.line_num = dline.line_num;
+ *   printf("parsing line #%lu ", pline.line_num);
+ * 
+ *   for (i = 0; i < dline.used; ++i)
+ *     printf("%c", dline.val[i]);
+ * 
+ *   return pline;
+ * } */
 
+PLine parse_getv(char* line, size_t lin_num)
+{
+  size_t i;
+  PLine pline;
+
+  pline.line_num = lin_num;
   pline.alloc_stat = 1;
   pline.well_formed = 1;
-  pline.line_num = dline.line_num;
   printf("parsing line #%lu ", pline.line_num);
 
-  for (i = 0; i < dline.used; i++)
-    printf("%c", dline.val[i]);
-  
+  for (i = 0; i < strlen(line); ++i)
+    printf("%c", line[i]);
+
   return pline;
 }
 
@@ -38,10 +55,10 @@ void free_text(PText text)
 
 bool add_parsed_line(PText* ptext, PLine pline)
 {
-  ptext->used++;
+  ++ptext->used;
 
   if (ptext->used >= ptext->len) {
-    ptext->val = (PLine*) realloc(ptext->val, new_len(ptext->len));
+    ptext->val = (PLine*) realloc(ptext->val, new_len(ptext->len) * sizeof(PLine));
 
     if (ptext->val == NULL)
       return false;

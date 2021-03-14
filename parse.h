@@ -70,7 +70,7 @@ void free_text(PText);
 void error(size_t);
 
 
-PLine parse(DLine);
-
+/* PLine parse(DLine); */
+PLine parse_getv(char*, size_t);
 
 #endif /* PARSE_H */
