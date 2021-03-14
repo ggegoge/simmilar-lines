@@ -36,7 +36,7 @@ typedef struct dyn_strs {
 
 typedef struct parsed_line {
   size_t line_num;
-  int alloc_stat, well_formed;
+  bool well_formed;
   char* sig;
   DInts ints;
   DFloats floats;
@@ -56,12 +56,12 @@ bool try_str(const char*, PLine*);
 
 
 /* adding any of the types to the array in PLine */
-bool add_parsed_int(PLine*, long long);
-bool add_parsed_float(PLine*, double);
-bool add_parsed_string(PLine*, char*);
+void add_parsed_int(PLine*, long long);
+void add_parsed_float(PLine*, double);
+void add_parsed_string(PLine*, char*);
 
 /* add one PLine to PText */
-bool add_parsed_line(PText*, PLine);
+void add_parsed_line(PText*, PLine);
 
 /* initialisation and freeing of the PText */
 PText init_ptext();
@@ -69,8 +69,6 @@ void free_text(PText);
 
 void error(size_t);
 
-
-/* PLine parse(DLine); */
-PLine parse_getv(char*, size_t);
+PLine parse(char*, size_t);
 
 #endif /* PARSE_H */
