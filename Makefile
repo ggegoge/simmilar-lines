@@ -1,19 +1,32 @@
+SHELL=/bin/sh
+
+.PHONY: all clean valgrind
+
+CC = gcc
+CFLAGS = -Wall -Wextra -Wpedantic -pedantic -std=c99 -D_GNU_SOURCE
+
 all: similar_lines;
 
 similar_lines: main.o input.o parse.o group.o
-	gcc -Wall -Wextra -Wpedantic -pedantic -std=c99 -o similar_lines main.o input.o parse.o group.o
+	$(CC) $(CFLAGS) -o similar_lines main.o input.o parse.o group.o
 
-main.o: main.c
-	gcc -Wall -Wextra -Wpedantic -pedantic -std=c99 -c main.c -o main.o
+.c.o:
+	$(CC) $(CFLAGS) -c $<
 
-input.o: input.c input.h
-	gcc -Wall -Wextra -Wpedantic -pedantic -std=c99 -c input.c -o input.o
+valgrind: similar_lines my_ex.in
+	valgrind --leak-check=full --track-origins=yes ./similar_lines <my_ex.in
 
-parse.o: parse.c parse.h
-	gcc -Wall -Wextra -Wpedantic -pedantic -std=c99 -c parse.c -o parse.o
+# main.o: main.c
+# 	$(CC) $(CFLAGS) -c main.c
 
-group.o: group.c group.h
-	gcc -Wall -Wextra -Wpedantic -pedantic -std=c99 -c group.c -o group.o
+# input.o: input.c input.h
+# 	$(CC) $(CFLAGS) -c input.c
+
+# parse.o: parse.c parse.h
+# 	$(CC) $(CFLAGS) -c parse.c
+
+# group.o: group.c group.h
+# 	$(CC) $(CFLAGS) -c group.c
 
 clean:
 	-rm *.o

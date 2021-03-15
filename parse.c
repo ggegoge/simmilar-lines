@@ -146,6 +146,8 @@ bool parse_whole(PLine* pline, const char* s)
   else
     num.sign = PLUS;
 
+  errno = 0;
+
   if (is_sign)
     num.abs = strtoull(s + 1, &err, 0);
   else
@@ -182,6 +184,7 @@ bool parse_real(PLine* pline, const char* s)
   double num;
   char* err;
 
+  errno = 0;
   num = strtod(s, &err);
 
   /* check if it is not a misbehaving integer. idk how toooo */

@@ -6,8 +6,7 @@
 #include "parse.h"
 
 /**
- * A tiny module for reading next lines from the stdin and then neatly packing them
- * into dynamic arrays DText and DLine
+ * A tiny module for reading next lines from the stdin.
  */
 
 /**
