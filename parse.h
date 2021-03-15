@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "input.h"
 
 /* the range of acceptable ascii chars */
 #define MIN_WORD_ASCII 33
@@ -12,12 +11,14 @@
 
 /* moduł do parse'owania */
 
-
+/* i store numbers and there signs so that they fit into one type */
 typedef struct whole {
   unsigned long long abs;
   enum { PLUS, MINUS } sign;
 } Whole;
 
+
+/* dynamic arrays for all the possible types of words */
 
 struct dyn_wholes {
   size_t used, len;
@@ -34,32 +35,8 @@ struct dyn_nans {
   char** val;
 };
 
-/* old structs... */
-typedef struct dyn_ints {
-  size_t used, len;
-  long long* val;
-} DInts;
 
-/* void append_ints(DInts*, long long new_num); */
-
-typedef struct dyn_floats {
-  size_t used, len;
-  double* val;
-} DFloats;
-
-
-typedef struct dyn_strs {
-  size_t used, len;
-  char** val;
-} DStrs;
-
-/* void append_floats(DFloats**, double new_num); */
-
-/* i'll store nonnumericals as a string? idk...
- * thats not the best idea tbf. I have to be able to distinguish those single
- * words. Perhaps I need a special container that can serve as it should?
- * First read as str and get the lenght? not feasible I'm afraid. ugh */
-
+/* a single parsed line (PLine) */
 typedef struct parsed_line {
   size_t line_num;
   bool well_formed;
@@ -69,23 +46,13 @@ typedef struct parsed_line {
   struct dyn_nans nans;
 } PLine;
 
-
-typedef struct parsed_line_old {
-  size_t line_num;
-  bool well_formed;
-  char* sig;
-  DInts ints;
-  DFloats floats;
-  DStrs nans;
-} PLine_old;
-
+/* dynamic array of parsed lines (PText) */
 typedef struct parsed_text {
   size_t used, len;
   PLine* val;
 } PText;
 
-
-/* initialisation and freeing of the PText */
+/* initialisation and freeing of the PText and of a pline */
 PText init_ptext();
 PLine init_pline(size_t);
 void free_text(PText);
@@ -106,22 +73,15 @@ bool parseull(PLine*, const char*);
 bool parsed(PLine*, const char*);
 bool parsestr(PLine, const char*);
 
-
 /* hideous names: */
 bool parse_whole(PLine*, const char*);
 bool parse_real(PLine*, const char*);
 bool parse_nan(PLine*, const char*);
 
 /* adding any of the types to the array in PLine */
-/* void add_parsed_int(PLine*, long long);
- * void add_parsed_float(PLine*, double);
- * void add_parsed_string(PLine*, char*); */
-
-/* adding any of the types to the array in PLine */
 void add_parsed_whole(PLine*, Whole);
 void add_parsed_real(PLine*, double);
 void add_parsed_nan(PLine*, const char*);
-
 
 /* add one PLine to PText */
 void add_parsed_line(PText*, PLine);

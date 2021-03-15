@@ -2,6 +2,7 @@
 #include <string.h>
 #include <errno.h>
 #include <math.h>
+#include <ctype.h>
 
 #include "parse.h"
 #include "input.h"
@@ -95,9 +96,10 @@ PLine init_pline(size_t line_num)
   return pline;
 }
 
+/* valgrind ciągle szczeka echhh */
 void free_text(PText text)
 {
-  for (size_t i = 0; i < text.used; ++i) {
+  for (size_t i = 0; i < text.len; ++i) {
     /* free whole nums */
     free(text.val[i].wholes.val);
 
@@ -105,7 +107,7 @@ void free_text(PText text)
     free(text.val[i].reals.val);
 
     /* free nans */
-    for (size_t j = 0; j < text.val[i].nans.used; ++j)
+    for (size_t j = 0; j < text.val[i].nans.len; ++j)
       if (text.val[i].nans.val[j])
         free(text.val[i].nans.val[j]);
 
@@ -224,9 +226,6 @@ bool parse_nan(PLine* pline, const char* s)
   return true;
 }
 
-/* !!! this does not work (yet) !!!
- * it is a necessity to strcpy each of those nans and then save them with their
- * own memory. So that the pline->nans stores pointers to *full strings*. */
 void add_parsed_nan(PLine* pline, const char* s)
 {
   char* new_nan;
@@ -250,8 +249,9 @@ void add_parsed_nan(PLine* pline, const char* s)
 
   strcpy(new_nan, s);
   pline->nans.val[pline->nans.used - 1] = new_nan;
-  /* pline->nans.val[pline->nans.used - 1] = (char*) malloc(strlen(s) + 1);
-   * strcpy(pline->nans.val[pline->nans.used - 1], s); */
+
+  for (size_t i = 0; i < strlen(s); ++i)
+    pline->nans.val[pline->nans.used - 1][i] = tolower(s[i]);
 }
 
 void add_parsed_line(PText* ptext, PLine pline)
@@ -267,53 +267,6 @@ void add_parsed_line(PText* ptext, PLine pline)
   }
 
   ptext->val[ptext->used - 1] = pline;
-}
-
-void add_parsed_float(PLine_old* pline, double num)
-{
-  pline->floats.used++;
-
-  if (pline->floats.used >= pline->floats.len) {
-    pline->floats.len = new_len(pline->floats.len);
-    pline->floats.val = (double*) realloc(pline->floats.val,
-                                          pline->floats.len * sizeof(double));
-
-    if (!pline->floats.val)
-      exit(1);
-  }
-
-  pline->floats.val[pline->floats.used - 1] = num;
-}
-
-void add_parsed_int(PLine_old* pline, long long num)
-{
-  pline->ints.used++;
-
-  if (pline->ints.used >= pline->ints.len) {
-    pline->ints.len = new_len(pline->ints.len);
-    pline->ints.val = (long long*) realloc(pline->ints.val,
-                                           pline->ints.len * sizeof(long long));
-
-    if (!pline->ints.val)
-      exit(1);
-  }
-
-  pline->ints.val[pline->ints.used - 1] = num;
-}
-
-void add_parsed_string(PLine* pline, char* str)
-{
-  pline->nans.used++;
-
-  if (pline->nans.used >= pline->nans.len) {
-    pline->nans.len = new_len(pline->nans.len);
-    pline->nans.val = (char**) realloc(pline->nans.val, new_len(pline->nans.len));
-
-    if (!pline->nans.val)
-      exit(1);
-  }
-
-  pline->nans.val[pline->nans.used - 1] = str;
 }
 
 bool check_word(char* w, size_t line_num)

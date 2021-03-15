@@ -6,7 +6,7 @@
 #include "parse.h"
 
 /**
- * A module for reading next lines from the stdin and then neatly packing them
+ * A tiny module for reading next lines from the stdin and then neatly packing them
  * into dynamic arrays DText and DLine
  */
 
@@ -27,8 +27,8 @@ void readln(char** line_ptr, size_t* len, bool* is_eof, bool* is_comm)
   if ((*is_comm = c == '#')) {
     /* move to the eol (eof if no eol) */
     printf("istotnie, komentarz\n");
+
     while (!feof(stdin) && (c = getc(stdin)) != '\n');
-    printf("char teraz: %c", c);
   }
 
   ungetc(c, stdin);
