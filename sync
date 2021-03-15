@@ -1,5 +1,5 @@
 #!/bin/bash
 
-rsync -a -m --exclude={'.git', '.gitignore', '*.org*'} . mimuw:~/test/wierszarz
+rsync -a -m --exclude={'.git'} . mimuw:~/test/wierszarz
 
 # ssh mimuw "screen -r wiersz; make -k; valgrind ./prog <lines.in"

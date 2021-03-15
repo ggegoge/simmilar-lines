@@ -24,26 +24,26 @@ int main(void)
 void read_text(PText* ptext)
 {
   size_t line_num = 1;
-
+  
   size_t len = 0;
   char* line = NULL;
   bool is_comm = false, is_eof = false;
-
+  
   PLine pline;
-
-
+  
+  
   while (!feof(stdin) && !is_eof) {
     readln(&line, &len, &is_eof, &is_comm);
-
+  
     if (!is_comm) {
-      pline = parse(line, line_num);
-
+      pline = parseln(line, line_num);
+  
       if (pline.well_formed)
         add_parsed_line(ptext, pline);
     }
-
+  
     ++line_num;
   }
-
+  
   free(line);
 }

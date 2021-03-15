@@ -23,6 +23,7 @@
   - [[https://www.geeksforgeeks.org/comparator-function-of-qsort-in-c/][casting voids + qsort]]
   - [[https://stackoverflow.com/a/27284318][qsort]]
   - [[https://stackoverflow.com/a/21097376][how does strtok work?]]
+  - [[https://stackoverflow.com/q/5229343][inline across multi-file projet]]
 
 
 * Modules
