@@ -40,6 +40,8 @@ void read_text(PText* ptext)
   
       if (pline.well_formed)
         add_parsed_line(ptext, pline);
+      else
+        free_line(pline);
     }
   
     ++line_num;

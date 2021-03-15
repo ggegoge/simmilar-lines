@@ -99,26 +99,26 @@ PLine init_pline(size_t line_num)
 /* valgrind ciągle szczeka echhh */
 void free_text(PText text)
 {
-  for (size_t i = 0; i < text.len; ++i) {
-    /* free whole nums */
-    free(text.val[i].wholes.val);
-
-    /* free reals */
-    free(text.val[i].reals.val);
-
-    /* free nans */
-    for (size_t j = 0; j < text.val[i].nans.len; ++j)
-      if (text.val[i].nans.val[j])
-        free(text.val[i].nans.val[j]);
-
-    free(text.val[i].nans.val);
-  }
+  for (size_t i = 0; i < text.used; ++i)
+    free_line(text.val[i]);
 
 
   if (text.val) {
     free(text.val);
     text.val = NULL;
   }
+
+}
+
+void free_line(PLine line)
+{
+  free(line.reals.val);
+  free(line.wholes.val);
+
+  for (size_t i = 0; i < line.nans.used; ++i)
+    free(line.nans.val[i]);
+
+  free(line.nans.val);
 
 }
 

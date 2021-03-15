@@ -56,6 +56,7 @@ typedef struct parsed_text {
 PText init_ptext();
 PLine init_pline(size_t);
 void free_text(PText);
+void free_line(PLine);
 
 /* parse single line */
 PLine parseln(char*, size_t);
