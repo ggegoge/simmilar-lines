@@ -1,16 +1,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <math.h>
 
 #include "parse.h"
 #include "input.h"
 
 PLine parseln(char* line, size_t line_num)
 {
-  PLine pline;
+  PLine pline = init_pline(line_num);
   char* word = NULL;
   char* delims = " \t\n\v\f\r";
-  pline.line_num = line_num;
+
+
   printf("parsing line #%lu ", pline.line_num);
 
   for (size_t i = 0; i < strlen(line); ++i)
@@ -20,14 +22,42 @@ PLine parseln(char* line, size_t line_num)
 
   word = strtok(line, delims);
 
+  if (!word) {
+    printf("pusta linjka\n");
+    pline.well_formed = false;
+    return pline;
+  }
+
   while (word) {
+    if (!(pline.well_formed = check_word(word, line_num)))
+      return pline;
+
     parse(&pline, word);
     printf("\"%s\"     ", word);
     word = strtok(NULL, delims);
-
-    if (!(pline.well_formed = check_word(word, line_num)))
-      return pline;
   }
+
+  printf("summary of line no #%lu:\n", line_num);
+  printf("all whole numbers:\n\t");
+
+  for (size_t i = 0; i < pline.wholes.used; ++i) {
+    if (pline.wholes.val[i].sign == PLUS)
+      printf("+");
+    else
+      printf("-");
+
+    printf("%llu, ", pline.wholes.val[i].abs);
+  }
+
+  printf("\nall real numbers:\n\t");
+
+  for (size_t i = 0; i < pline.reals.used; ++i)
+    printf("%f, ", pline.reals.val[i]);
+
+  printf("\nall nans:\n\t");
+
+  for (size_t i = 0; i < pline.nans.used; ++i)
+    printf("'%s', ", pline.nans.val[i]);
 
   printf("\n-------------\n");
 
@@ -43,12 +73,51 @@ PText init_ptext()
   return ptext;
 }
 
+PLine init_pline(size_t line_num)
+{
+  PLine pline;
+  pline.line_num = line_num;
+  pline.well_formed = true;
+
+  pline.wholes.len = INIT_ARR_SIZE;
+  pline.wholes.used = 0;
+  pline.wholes.val = (Whole*) malloc(INIT_ARR_SIZE * sizeof(Whole));
+
+  pline.reals.len = INIT_ARR_SIZE;
+  pline.reals.used = 0;
+  pline.reals.val = (double*) malloc(INIT_ARR_SIZE * sizeof(double));
+
+  pline.nans.len = INIT_ARR_SIZE;
+  pline.nans.used = 0;
+  pline.nans.val = (char**) malloc(INIT_ARR_SIZE * sizeof(char*));
+
+
+  return pline;
+}
+
 void free_text(PText text)
 {
+  for (size_t i = 0; i < text.used; ++i) {
+    /* free whole nums */
+    free(text.val[i].wholes.val);
+
+    /* free reals */
+    free(text.val[i].reals.val);
+
+    /* free nans */
+    for (size_t j = 0; j < text.val[i].nans.used; ++j)
+      if (text.val[i].nans.val[j])
+        free(text.val[i].nans.val[j]);
+
+    free(text.val[i].nans.val);
+  }
+
+
   if (text.val) {
     free(text.val);
     text.val = NULL;
   }
+
 }
 
 void parse(PLine* pline, const char* word)
@@ -64,8 +133,11 @@ void parse(PLine* pline, const char* word)
 bool parse_whole(PLine* pline, const char* s)
 {
   Whole num;
-  bool is_sign = s[0] == '+' || s[0] == '-';
+  bool is_sign = (s[0] == '+' || s[0] == '-');
   char* err;
+
+  if (is_sign && strlen(s) == 1)
+    return false;
 
   if (s[0] == '-')
     num.sign = MINUS;
@@ -77,7 +149,7 @@ bool parse_whole(PLine* pline, const char* s)
   else
     num.abs = strtoull(s, &err, 0);
 
-  if (*err == '\0' || errno == ERANGE)
+  if (*err != '\0' || errno == ERANGE)
     return false;
   else {
     add_parsed_whole(pline, num);
@@ -94,7 +166,7 @@ void add_parsed_whole(PLine* pline, Whole num)
   if (pline->wholes.used >= pline->wholes.len) {
     pline->wholes.len = new_len(pline->wholes.len);
     pline->wholes.val = (Whole*) realloc(pline->wholes.val,
-                                           pline->wholes.len * sizeof(Whole));
+                                         pline->wholes.len * sizeof(Whole));
 
     if (!pline->wholes.val)
       exit(1);
@@ -109,8 +181,18 @@ bool parse_real(PLine* pline, const char* s)
   char* err;
 
   num = strtod(s, &err);
-  
-  if (*err == '\0' || errno == ERANGE)
+
+  /* check if it is not a misbehaving integer. idk how toooo */
+  /* if (num == ceil(num)) {
+   *   printf("this double %f is an int in fact\n", num);
+   *   return false;
+   * } */
+
+  /* nan is a nan as the name specifies */
+  if (isnan(num))
+    return false;
+
+  if (*err != '\0' || errno == ERANGE)
     return false;
   else {
     add_parsed_real(pline, num);
@@ -121,12 +203,12 @@ bool parse_real(PLine* pline, const char* s)
 
 void add_parsed_real(PLine* pline, double num)
 {
-  pline->wholes.used++;
+  pline->reals.used++;
 
   if (pline->reals.used >= pline->reals.len) {
     pline->reals.len = new_len(pline->reals.len);
     pline->reals.val = (double*) realloc(pline->reals.val,
-                                           pline->reals.len * sizeof(double));
+                                         pline->reals.len * sizeof(double));
 
     if (!pline->reals.val)
       exit(1);
@@ -135,6 +217,42 @@ void add_parsed_real(PLine* pline, double num)
   pline->reals.val[pline->reals.used - 1] = num;
 }
 
+
+bool parse_nan(PLine* pline, const char* s)
+{
+  add_parsed_nan(pline, s);
+  return true;
+}
+
+/* !!! this does not work (yet) !!!
+ * it is a necessity to strcpy each of those nans and then save them with their
+ * own memory. So that the pline->nans stores pointers to *full strings*. */
+void add_parsed_nan(PLine* pline, const char* s)
+{
+  char* new_nan;
+
+  pline->nans.used++;
+
+  if (pline->nans.used >= pline->nans.len) {
+    pline->nans.len = new_len(pline->nans.len);
+    pline->nans.val = (char**) realloc(pline->nans.val,
+                                       pline->nans.len * sizeof(char*));
+
+    if (!pline->nans.val)
+      exit(1);
+  }
+
+  new_nan = pline->nans.val[pline->nans.used - 1];
+  new_nan = (char*) malloc(strlen(s) + 1);
+
+  if (!new_nan)
+    exit(1);
+
+  strcpy(new_nan, s);
+  pline->nans.val[pline->nans.used - 1] = new_nan;
+  /* pline->nans.val[pline->nans.used - 1] = (char*) malloc(strlen(s) + 1);
+   * strcpy(pline->nans.val[pline->nans.used - 1], s); */
+}
 
 void add_parsed_line(PText* ptext, PLine pline)
 {
@@ -202,7 +320,7 @@ bool check_word(char* w, size_t line_num)
 {
   for (size_t i = 0; i < strlen(w); ++i) {
     if (w[i] < MIN_WORD_ASCII || w[i] > MAX_WORD_ASCII) {
-      fprintf(stderr, "ERROR %lu", line_num);
+      fprintf(stderr, "ERROR %lu\n", line_num);
       return false;
     }
   }

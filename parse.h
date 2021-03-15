@@ -87,6 +87,7 @@ typedef struct parsed_text {
 
 /* initialisation and freeing of the PText */
 PText init_ptext();
+PLine init_pline(size_t);
 void free_text(PText);
 
 /* parse single line */
@@ -119,7 +120,7 @@ bool parse_nan(PLine*, const char*);
 /* adding any of the types to the array in PLine */
 void add_parsed_whole(PLine*, Whole);
 void add_parsed_real(PLine*, double);
-void add_parsed_nan(PLine*, char*);
+void add_parsed_nan(PLine*, const char*);
 
 
 /* add one PLine to PText */
