@@ -77,7 +77,6 @@ bool parsestr(PLine, const char*);
 /* hideous names: */
 bool parse_whole(PLine*, const char*);
 bool parse_real(PLine*, const char*);
-bool parse_nan(PLine*, const char*);
 
 /* adding any of the types to the array in PLine */
 void add_parsed_whole(PLine*, Whole);

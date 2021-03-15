@@ -5,10 +5,12 @@ SHELL=/bin/sh
 CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -pedantic -std=c99 -D_GNU_SOURCE
 
+OBJS = main.o input.o parse.o group.o
+
 all: similar_lines;
 
-similar_lines: main.o input.o parse.o group.o
-	$(CC) $(CFLAGS) -o similar_lines main.o input.o parse.o group.o
+similar_lines: $(OBJS)
+	$(CC) $(CFLAGS) -o similar_lines $(OBJS)
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
@@ -29,5 +31,5 @@ valgrind: similar_lines my_ex.in
 # 	$(CC) $(CFLAGS) -c group.c
 
 clean:
-	-rm *.o
+	-rm $(OBJS)
 	-rm similar_lines

@@ -13,23 +13,16 @@ PLine parseln(char* line, size_t line_num)
   char* word = NULL;
   char* delims = " \t\n\v\f\r";
 
-
-  printf("parsing line #%lu ", pline.line_num);
-
-  for (size_t i = 0; i < strlen(line); ++i)
-    printf("%c", line[i]);
-
-  printf("splitting #%lu line into words\n", line_num);
-
   word = strtok(line, delims);
 
+  /* pusta linia? */
   if (!word) {
-    printf("pusta linjka\n");
     pline.well_formed = false;
     return pline;
   }
 
   while (word) {
+    /* sprawdzian, czy znaki spelniaja zalozenia */
     if (!(pline.well_formed = check_word(word, line_num)))
       return pline;
 
@@ -37,30 +30,6 @@ PLine parseln(char* line, size_t line_num)
     printf("\"%s\"     ", word);
     word = strtok(NULL, delims);
   }
-
-  printf("summary of line no #%lu:\n", line_num);
-  printf("all whole numbers:\n\t");
-
-  for (size_t i = 0; i < pline.wholes.used; ++i) {
-    if (pline.wholes.val[i].sign == PLUS)
-      printf("+");
-    else
-      printf("-");
-
-    printf("%llu, ", pline.wholes.val[i].abs);
-  }
-
-  printf("\nall real numbers:\n\t");
-
-  for (size_t i = 0; i < pline.reals.used; ++i)
-    printf("%f, ", pline.reals.val[i]);
-
-  printf("\nall nans:\n\t");
-
-  for (size_t i = 0; i < pline.nans.used; ++i)
-    printf("'%s', ", pline.nans.val[i]);
-
-  printf("\n-------------\n");
 
   return pline;
 }
@@ -96,7 +65,7 @@ PLine init_pline(size_t line_num)
   return pline;
 }
 
-/* valgrind ciągle szczeka echhh */
+
 void free_text(PText text)
 {
   for (size_t i = 0; i < text.used; ++i)
@@ -124,11 +93,10 @@ void free_line(PLine line)
 
 void parse(PLine* pline, const char* word)
 {
-  bool succ = parse_whole(pline, word) || parse_real(pline, word) ||
-              parse_nan(pline, word);
-
-  if (!succ)
-    fprintf(stderr, "this shit aint parsable!\n");
+  if (parse_whole(pline, word) || parse_real(pline, word))
+    return;
+  
+  add_parsed_nan(pline, word);
 }
 
 
@@ -184,6 +152,10 @@ bool parse_real(PLine* pline, const char* s)
   double num;
   char* err;
 
+  /* it is not a real number but a too large of an integer */
+  if (errno == ERANGE)
+    return false;
+
   errno = 0;
   num = strtod(s, &err);
 
@@ -222,12 +194,6 @@ void add_parsed_real(PLine* pline, double num)
   pline->reals.val[pline->reals.used - 1] = num;
 }
 
-
-bool parse_nan(PLine* pline, const char* s)
-{
-  add_parsed_nan(pline, s);
-  return true;
-}
 
 void add_parsed_nan(PLine* pline, const char* s)
 {
@@ -283,4 +249,3 @@ bool check_word(char* w, size_t line_num)
 
   return true;
 }
-
