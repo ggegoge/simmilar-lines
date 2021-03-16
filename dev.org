@@ -1,6 +1,7 @@
 # #+TITLE: Development logs, problems etc
 * Problems
   Listed here is everything I havent managed to ponder upon or fix yet
+  - *double, który jest intem*
   
 
 * Links
@@ -8,7 +9,7 @@
   - [[https://stackoverflow.com/questions/5406935/reading-a-string-with-scanf/5407121][strings with scanf]]
   - [[https://stackoverflow.com/questions/1428911/detecting-eof-in-c][eof detection]]
   - [[https://en.wikipedia.org/wiki/Include_guard#File_"grandparent.h"][inclu guards]]
-  - [[https://stackoverflow.com/questions/5607455/checking-that-malloc-succeeded-in-c][malloc failure]] -- *what to do then??*
+  - [[https://stackoverflow.com/questions/5607455/checking-that-malloc-succeeded-in-c][malloc failure]] -- *what to do then??* <-- /end with code 1/ -> ~exit(1)~
   - [[https://www.cplusplus.com/reference/cstdio/scanf/][scanf docs]]
   - [[https://unix.stackexchange.com/questions/239088/insert-result-of-command-into-an-executable-one-command][command res into an exec]]
   - [[https://man7.org/linux/man-pages/man3/getline.3.html][getline and getdelim]]
@@ -24,43 +25,73 @@
   - [[https://stackoverflow.com/a/27284318][qsort]]
   - [[https://stackoverflow.com/a/21097376][how does strtok work?]]
   - [[https://stackoverflow.com/q/5229343][inline across multi-file projet]]
+  - [[https://github.com/python/cpython/blob/7591d9455eb37525c832da3d65e1a7b3e6dbf613/Objects/listobject.c#L61][nowa długość tablic]]
 
 
 * Modules
   Keep it simple. Module ~m~ is ~m.c~ + ~m.h~. 
 
 ** module list
-*** ~group~
+*** ~array~
 *** ~input~
 *** ~parse~
+*** ~group~
 *** ~main~
 
     
+* Array
+  One of the things I am most proud of.
+
+  A small function to generate new length for an array:
+  #+begin_src C
+    size_t new_len(size_t curr_len)
+    {
+      return ((size_t)curr_len + (curr_len >> 3) + 6) & ~(size_t)3;
+    }
+  #+end_src
+  An epic function that takes generic dynamic arrays, casts them at a general case
+
+  Here is the dynamic array on which all other are based:
+  #+begin_src C
+    typedef struct dyn_anything {
+      size_t used, len;
+      void* val;
+    } DynArr;
+  #+end_src
+  Here's the appending process:
+  #+begin_src C
+    void append(void* p, size_t width, void* new_el)
+    {
+      DynArr* a = (DynArr*)p;
+      ++a->used;
+
+      if (a->used >= a->len) {
+        a->len = new_len(a->len);
+        a->val = realloc(a->val, a->len * width);
+
+        if (!a->val)
+          exit(1);
+      }
+
+      memcpy((char*)a->val + ((a->used - 1) * width), new_el, width);
+    }
+  #+end_src
 * Main
-  *everything returns an int* -- so that  each memory problem is documented by the integer exit code
-   so i can end everything if such problem occurs
-**   the order of proceeding
+** the order of proceeding
    1. i create an initial array for parsed text in which I ll store all parsed lines. this i get from
       the ~parse~ module
    2. i call ~input~. it reads every line, calls ~parse~ on each of them and the parsed line gets added to
       the initial array for parsed text
       - I deal with the parsed line in a particular way
    3. having all lines safely parsed in the PText, I can proceed to sorting it
-      - custom comparator
-   4. having al of them sorted it is easy to find the identical ones
+   4. this is done with ~group~
+   5. having al of them sorted it is easy to find the identical ones
 
 * Input
 
 ** how we do it now
-   In the input module (perhaps i shoudl change the name) I read data from stdin but then I dont
-   save each line (which involves a lot of copying etc) but rather I have one dynamic line of
-   ~DLine~ type which serves me as the main buffer for each line.
-
-   when called it gets a *ptext* array to store the parsed text in
-
-   After having loaded a single line it calls *parse* module's ~parse~ procedure to parse the read
-   line which then gets added to the ptext
-
+   I use ~getline~ and keep this memory to allocate next lines.
+   Single func: ~readln~
    
    
 ** +old vers+
@@ -79,12 +110,16 @@
 * Parse
   Parsing is in the ~parse~ module obviously. How should it be done?
 
-  I take raw *DLines* and translate them into neat & tidy *PLines*
+  I take raw lines (ie. strings) and translate them into neat & tidy *PLines*
   a *PLine* should consist of
-***** all the ints
-***** all the floats
+***** all the whole numbers
+      for each I have a structure ~Whole~ which stores the number's sign and absolute value
+***** all the reals
 ***** all the nans
 *** The order
+**** parse whole
+**** parse real
+**** parse nan
 ** Parsing different things  
 *** Word splitting
     I shoudl use ~strtok~ from C stdlib. It is a little bit /strange/ but as far as I understand it
@@ -97,71 +132,12 @@
        as u get
 
     Bettr described [[https://stackoverflow.com/questions/21097253/how-does-the-strtok-function-in-c-work][here]]
+**** It works actually!
 *** Parsing those single words/strings
-    I have come up with two approaches 
-**** ~try_type~
-     I define ~try_float~, ~try_int~ etc, then they call ~try_fromat_type~ with different format
-     strings each for different kind of ~type~ of theirs. So
-
-     ~try_int~ would get the *PLine* to edit, string to parse
-     It would do sth like
-     #+begin_src C
-       if (try_format_int("%x", ...) || try_format_int("%o", ...) || ...)
-           return 1;
-       else
-         return 0;
-     #+end_src
-     so try to parse it with different format strings.
-
-     Each ~try_format~ would consist of a ~sscanf~ and (if succesfull) it'd append it to *PLine*
-     ~type~ drawer.
-**** ~try_polymorphic~
-     Messing with polymorphism in C...
-
-     So there'd be single ~try_poly~ func that would get four things:
-
-     1. *PLine*
-     2. string to parse
-     3. format
-     4. function that'd add the result to *PLine*
-
-     It would try to scanf it with the appriopriate format and then save the result under any type
-     basically but try to send it back and save inside *PLine* with the ~add~ function
-
-     The ~add~ would be sth like
-
-     =void(*add)(PLine, void *)=
-     Why? Welllllll so as i can get /any type/ in ~poly_try~ I cannot send anything specific to the
-     add func but a pointer to the result of scanf. So it would need to be ~void*~. But then I can
-     cast it as I see fit.
-
-     eg
-     #+begin_src C
-       void add_int(PLine pl, void* val)
-       {
-         int real_val = *(int*)val;
-         /* add it somehau */
-         add_int(pl.ints, real_val);
-       }
-     #+end_src
-     Ofc i can keep add as one func that manages all of that
-***** Would it werkk?
-      Can I save result from ~sscanf(s, any_format, &some_long_long_var)~ under really any long long
-      variable and only then /type it back/ in the ~add~ func?
-***** Parse polymorphicallly a string...
-      idk if that'd hold up since a *string is scanffed differentely than anything else*
-      + strings have unnknown size. well perhaps the way is to scan it char wise.
-      + so i can have multiple chars in there
-      + with a separator of my choosing
-      + hence that'd be the beg of a ~sig~
-
-***** ok, this is not the best idea. *heres why*
-      so i have to keep both each number and each *nan* separately. why? only then i can be sure
-      whether a line is or isnt simmilar.
-
-      hence the scanf-ing is not so straightforward.
-      
-***** code
+    I use the ~strto*~ family ie ~strtoull~ and ~strtod~. I check the ~errno~ for ~ERANGE~ errors +
+    I see whether everything is parsed. If not, the parsing unit returns false.
+    
+***** COMMENT code (old)
       #+begin_src C
         /* POLYMORPHIC VARIANT */
 
@@ -223,18 +199,5 @@
 
 
 * Group
+  I have a function that finds similars, each is normalised etc. a lot of qsorting all aroun.
 
-* Form sigs/sort
-  I'll have (for each pline) arrays of ints, floats and strings. So then I can either pump
-  everything into the ~sig~ string or I can qsort all the plines with a comparator of sorts.
-
-  Lets have all the arrays stored inside sorted beforehand.
-  
-** cus cmp
-   How to compare them?
-   ~pl1~ and ~pl2~. if ~pl1.ints.length > ~pl2.ints.length~ then ~pl1 > pl2~.
-   If lengths eq, then check each idx. When there's a diff, then return the bigger as bigger
-
-   same with strings but strcmp there. ugghhhhhhhhhh a lot of /rzeźba/ all around here. me not likey
-
-   tiresome
