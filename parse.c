@@ -2,6 +2,7 @@
 #include <string.h>
 #include <errno.h>
 #include <math.h>
+#include <limits.h>
 #include <ctype.h>
 
 #include "array.h"
@@ -131,6 +132,7 @@ bool parse_whole(PLine* pline, const char* s)
 bool parse_real(PLine* pline, const char* s)
 {
   double num;
+  Whole whole_num;
   char* err;
 
   /* it is not a real number but a too large of an integer */
@@ -140,15 +142,24 @@ bool parse_real(PLine* pline, const char* s)
   errno = 0;
   num = strtod(s, &err);
 
-  /* check if it is not a misbehaving integer. idk how toooo */
-  /* if (num == ceil(num)) {
-   *   printf("this double %f is an int in fact\n", num);
-   *   return false;
-   * } */
-
   /* nan is a nan as the name specifies */
   if (isnan(num))
     return false;
+
+  /* check if it is not a misbehaving integer. idk how toooo */
+  if (isfinite(num) && fabs(num) == (unsigned long long)fabs(num)) {
+    if (fabs(num) <= ULLONG_MAX) {
+      whole_num.abs = (unsigned long long) fabs(num);
+
+      if (num > 0)
+        whole_num.sign = PLUS;
+      else
+        whole_num.sign = MINUS;
+
+      append(&pline->wholes, sizeof(Whole), &whole_num);
+      return true;
+    }
+  }
 
   if (*err != '\0' || errno == ERANGE)
     return false;
