@@ -15,7 +15,7 @@ similar_lines: $(OBJS)
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 
-valgrind: similar_lines my_ex.in
+valgrind: similar_lines tests/my_ex.in
 	valgrind --leak-check=full --track-origins=yes ./similar_lines <tests/my_ex.in
 
 # main.o: main.c
