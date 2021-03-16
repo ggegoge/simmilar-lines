@@ -4,8 +4,8 @@
 #include <math.h>
 #include <ctype.h>
 
+#include "array.h"
 #include "parse.h"
-#include "input.h"
 
 PLine parseln(char* line, size_t line_num)
 {
@@ -27,7 +27,6 @@ PLine parseln(char* line, size_t line_num)
       return pline;
 
     parse(&pline, word);
-    printf("\"%s\"     ", word);
     word = strtok(NULL, delims);
   }
 
@@ -37,9 +36,9 @@ PLine parseln(char* line, size_t line_num)
 PText init_ptext()
 {
   PText ptext;
-  ptext.len = INIT_ARR_SIZE;
+  ptext.len = BIG_ARRAY;
   ptext.used = 0;
-  ptext.val = (PLine*) malloc(INIT_ARR_SIZE * sizeof(PLine));
+  ptext.val = (PLine*) malloc(ptext.len * sizeof(PLine));
   return ptext;
 }
 
@@ -49,17 +48,17 @@ PLine init_pline(size_t line_num)
   pline.line_num = line_num;
   pline.well_formed = true;
 
-  pline.wholes.len = INIT_ARR_SIZE;
+  pline.wholes.len = SMALL_ARRAY;
   pline.wholes.used = 0;
-  pline.wholes.val = (Whole*) malloc(INIT_ARR_SIZE * sizeof(Whole));
+  pline.wholes.val = (Whole*) malloc(pline.wholes.len * sizeof(Whole));
 
-  pline.reals.len = INIT_ARR_SIZE;
+  pline.reals.len = SMALL_ARRAY;
   pline.reals.used = 0;
-  pline.reals.val = (double*) malloc(INIT_ARR_SIZE * sizeof(double));
+  pline.reals.val = (double*) malloc(pline.reals.len * sizeof(double));
 
-  pline.nans.len = INIT_ARR_SIZE;
+  pline.nans.len = SMALL_ARRAY;
   pline.nans.used = 0;
-  pline.nans.val = (char**) malloc(INIT_ARR_SIZE * sizeof(char*));
+  pline.nans.val = (char**) malloc(pline.nans.len * sizeof(char*));
 
 
   return pline;
@@ -95,8 +94,8 @@ void parse(PLine* pline, const char* word)
 {
   if (parse_whole(pline, word) || parse_real(pline, word))
     return;
-  
-  add_parsed_nan(pline, word);
+
+  new_parsed_nan(pline, word);
 }
 
 
@@ -124,27 +123,9 @@ bool parse_whole(PLine* pline, const char* s)
   if (*err != '\0' || errno == ERANGE)
     return false;
   else {
-    add_parsed_whole(pline, num);
+    append(&pline->wholes, sizeof(Whole), &num);
     return true;
   }
-
-}
-
-
-void add_parsed_whole(PLine* pline, Whole num)
-{
-  pline->wholes.used++;
-
-  if (pline->wholes.used >= pline->wholes.len) {
-    pline->wholes.len = new_len(pline->wholes.len);
-    pline->wholes.val = (Whole*) realloc(pline->wholes.val,
-                                         pline->wholes.len * sizeof(Whole));
-
-    if (!pline->wholes.val)
-      exit(1);
-  }
-
-  pline->wholes.val[pline->wholes.used - 1] = num;
 }
 
 bool parse_real(PLine* pline, const char* s)
@@ -172,70 +153,25 @@ bool parse_real(PLine* pline, const char* s)
   if (*err != '\0' || errno == ERANGE)
     return false;
   else {
-    add_parsed_real(pline, num);
+    append(&pline->reals, sizeof(double), &num);
     return true;
   }
 
 }
 
-void add_parsed_real(PLine* pline, double num)
+
+void new_parsed_nan(PLine* pline, const char* s)
 {
-  pline->reals.used++;
-
-  if (pline->reals.used >= pline->reals.len) {
-    pline->reals.len = new_len(pline->reals.len);
-    pline->reals.val = (double*) realloc(pline->reals.val,
-                                         pline->reals.len * sizeof(double));
-
-    if (!pline->reals.val)
-      exit(1);
-  }
-
-  pline->reals.val[pline->reals.used - 1] = num;
-}
-
-
-void add_parsed_nan(PLine* pline, const char* s)
-{
-  char* new_nan;
-
-  pline->nans.used++;
-
-  if (pline->nans.used >= pline->nans.len) {
-    pline->nans.len = new_len(pline->nans.len);
-    pline->nans.val = (char**) realloc(pline->nans.val,
-                                       pline->nans.len * sizeof(char*));
-
-    if (!pline->nans.val)
-      exit(1);
-  }
-
-  new_nan = pline->nans.val[pline->nans.used - 1];
-  new_nan = (char*) malloc(strlen(s) + 1);
+  char* new_nan = (char*) malloc(strlen(s) + 1);
 
   if (!new_nan)
     exit(1);
 
   strcpy(new_nan, s);
-  pline->nans.val[pline->nans.used - 1] = new_nan;
+  append(&pline->nans, sizeof(char*), &new_nan);
 
   for (size_t i = 0; i < strlen(s); ++i)
     pline->nans.val[pline->nans.used - 1][i] = tolower(s[i]);
-}
-
-void add_parsed_line(PText* ptext, PLine pline)
-{
-  ++ptext->used;
-
-  if (ptext->used >= ptext->len) {
-    ptext->len = new_len(ptext->len);
-    ptext->val = (PLine*) realloc(ptext->val, ptext->len * sizeof(PLine));
-
-    if (!ptext->val)
-      exit(1);
-  }
-
-  ptext->val[ptext->used - 1] = pline;
 }
 
 bool check_word(char* w, size_t line_num)

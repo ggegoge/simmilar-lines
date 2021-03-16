@@ -2,12 +2,12 @@
 #include <stdbool.h>
 #include <math.h>
 
+#include "array.h"
 #include "input.h"
 #include "parse.h"
 #include "group.h"
+#include "main.h"
 
-
-void read_text(PText*);
 
 int main(void)
 {
@@ -39,7 +39,8 @@ void read_text(PText* ptext)
       pline = parseln(line, line_num);
   
       if (pline.well_formed)
-        add_parsed_line(ptext, pline);
+        append(ptext, sizeof(PLine), &pline);
+        /* add_parsed_line(ptext, pline); */
       else
         free_line(pline);
     }

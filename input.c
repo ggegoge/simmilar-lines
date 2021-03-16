@@ -3,28 +3,24 @@
 #include <math.h>
 
 #include "input.h"
-#include "parse.h"
 
 /**
- * A tiny module for reading next lines from the stdin.
+ * Modulik do wczytywania.
  */
 
 /**
- *  read the current line up to the '\n' or EOF.
- *  if it is a comment line (ie starts with '#') then move to the end without
- *  reading it into the memory.
- *  Params:
- *  @line_ptr is buffer to save the line in,
- *  @len is the place to store buffer's size,
- *  @is_eof and @is_comm store the information whether the line has ended and
- *  if it is a commentary line perhaps.
+ *  Wczytywanie z stdinu danych aż do końca linii ('\n' lub eof).
+ *  @line_ptr bufor do zapisywania linijek,
+ *  @len obecny rozmiar bufora,
+ *  @is_eof i @is_comm to boolowskie wyznaczniki mówiące (opowiednio):
+ *  czy wejście się już skończyło (eof) bądź czy ten wiersz jest komentarzem.
  */
 void readln(char** line_ptr, size_t* len, bool* is_eof, bool* is_comm)
 {
   char c = getc(stdin);
 
   if ((*is_comm = c == '#')) {
-    /* move to the eol (eof if no eol) */
+    /* przesunięcie aż do eofa/eola */
     printf("istotnie, komentarz\n");
 
     while (!feof(stdin) && (c = getc(stdin)) != '\n');

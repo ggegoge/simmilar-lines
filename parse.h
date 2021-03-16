@@ -18,8 +18,6 @@ typedef struct whole {
 } Whole;
 
 
-/* dynamic arrays for all the possible types of words */
-
 struct dyn_wholes {
   size_t used, len;
   Whole* val;
@@ -78,12 +76,7 @@ bool parsestr(PLine, const char*);
 bool parse_whole(PLine*, const char*);
 bool parse_real(PLine*, const char*);
 
-/* adding any of the types to the array in PLine */
-void add_parsed_whole(PLine*, Whole);
-void add_parsed_real(PLine*, double);
-void add_parsed_nan(PLine*, const char*);
-
-/* add one PLine to PText */
-void add_parsed_line(PText*, PLine);
+/* alokacja pamięci pod nieliczby */
+void new_parsed_nan(PLine*, const char*);
 
 #endif /* PARSE_H */

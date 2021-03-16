@@ -5,7 +5,7 @@ SHELL=/bin/sh
 CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -pedantic -std=c99 -D_GNU_SOURCE
 
-OBJS = main.o input.o parse.o group.o
+OBJS = main.o input.o parse.o group.o array.o
 
 all: similar_lines;
 

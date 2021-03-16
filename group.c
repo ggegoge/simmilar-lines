@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "input.h"
+#include "array.h"
 #include "parse.h"
 #include "group.h"
 
@@ -32,16 +32,25 @@ void normalise(PLine* plines, size_t len)
  * zakładając, że jest to tablica posortowana. @len to jej długość. */
 void find_similars(PLine* plines, size_t len)
 {
+  Groups all_groups;
   bool new_group = true;
   size_t i = 0;
   PLine curr_line;
   PLine group_line;
   Group group;
-  group.len = INIT_ARR_SIZE;
+
+  group.len = SMALL_ARRAY;
   group.used = 0;
   group.val = (size_t*)malloc(group.len * sizeof(size_t));
 
   if (!group.val)
+    exit(1);
+
+  all_groups.len = BIG_ARRAY;
+  all_groups.used = 0;
+  all_groups.val = (size_t**) malloc(all_groups.len * sizeof(size_t**));
+
+  if (!all_groups.val)
     exit(1);
 
   while (i < len) {
@@ -49,54 +58,76 @@ void find_similars(PLine* plines, size_t len)
 
     if (new_group) {
       group_line = curr_line;
-      add_similar(&group, curr_line.line_num);
+      append(&group, sizeof(size_t), &curr_line.line_num);
+      /* add_similar(&group, curr_line.line_num); */
       new_group = !new_group;
       ++i;
     } else if (pline_cmp(&curr_line, &group_line)) {
-      end_group(&group);
+      end_group(&group, &all_groups);
       new_group = true;
     } else {
-      add_similar(&group, curr_line.line_num);
+      append(&group, sizeof(size_t), &curr_line.line_num);
+      /* add_similar(&group, curr_line.line_num); */
       ++i;
     }
   }
 
   if (group.used != 0)
-    end_group(&group);
+    end_group(&group, &all_groups);
 
+  qsort(all_groups.val, all_groups.used, sizeof(size_t*), cmp_size_t_p);
+  print_all_groups(all_groups);
+  free_groups(all_groups);
   free(group.val);
 }
 
-/**
- * Funkcja dodająca do dynamicznej tablicy @group numer wiersza @line_num. */
-void add_similar(Group* group, size_t line_num)
-{
-  ++group->used;
-
-  if (group->used >= group->len) {
-    group->len = new_len(group->len);
-    group->val = (size_t*) realloc(group->val, group->len * sizeof(size_t));
-
-    if (!group->val)
-      exit(1);
-  }
-
-  group->val[group->used - 1] = line_num;
-}
 
 /**
  *  Procedura zakończenia przetwarzania obecnej grupy @group. */
-void end_group(Group* group)
+void end_group(Group* group, Groups* all_groups)
 {
   qsort(group->val, group->used, sizeof(size_t), cmp_size_t);
 
-  for (size_t i = 0; i < group->used - 1; ++i)
-    printf("%lu ", group->val[i]);
-
-  printf("%lu\n", group->val[group->used - 1]);
+  add_group(*group, all_groups);
   group->used = 0;
 }
 
+void add_group(Group group, Groups* all_groups)
+{
+  size_t* new_group = (size_t*) malloc((group.used + 1) * sizeof(size_t));
+
+  if (!new_group)
+    exit(1);
+
+  memcpy(new_group, group.val, sizeof(size_t) * group.used);
+  /* brak wiersza zerowego -- mogę tak markować koniec */
+  new_group[group.used] = 0;
+  append(all_groups, sizeof(size_t*), &new_group);
+}
+
+void print_all_groups(Groups all_groups)
+{
+  size_t i, j;
+
+  for (i = 0; i < all_groups.used; ++i) {
+    j = 0;
+
+    while (all_groups.val[i][j + 1] != 0) {
+      printf("%lu ", all_groups.val[i][j]);
+      ++j;
+    }
+
+    printf("%lu\n", all_groups.val[i][j]);
+  }
+}
+
+void free_groups(Groups all_groups)
+{
+  for (size_t i = 0; i < all_groups.used; ++i)
+    free(all_groups.val[i]);
+
+  free(all_groups.val);
+}
 
 /**
  *  Funkcja porównująca wiersze @l1 oraz @l2. Jak wszystkie funkcje porównujące
@@ -195,4 +226,9 @@ int cmp_nan(const void* sp1, const void* sp2)
 int cmp_size_t(const void* a, const void* b)
 {
   return *(size_t*)a - *(size_t*)b;
+}
+
+int cmp_size_t_p(const void* a, const void* b)
+{
+  return **(size_t**)a -** (size_t**)b;
 }
