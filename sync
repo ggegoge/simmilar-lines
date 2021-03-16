@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# synchronizacja z serwerem
+
 rsync -a -m --exclude={'.git'} . mimuw:~/test/wierszarz
 
 # ssh mimuw "screen -r wiersz; make -k; valgrind ./prog <lines.in"

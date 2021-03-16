@@ -40,7 +40,7 @@ void find_similars(PLine* plines, size_t len)
 
   group.len = SMALL_ARRAY;
   group.used = 0;
-  group.val = (size_t*)malloc(group.len * sizeof(size_t));
+  group.val = (size_t*) malloc(group.len * sizeof(size_t));
 
   if (!group.val)
     exit(1);
@@ -58,7 +58,6 @@ void find_similars(PLine* plines, size_t len)
     if (new_group) {
       group_line = curr_line;
       append(&group, sizeof(size_t), &curr_line.line_num);
-      /* add_similar(&group, curr_line.line_num); */
       new_group = !new_group;
       ++i;
     } else if (pline_cmp(&curr_line, &group_line)) {
@@ -66,7 +65,6 @@ void find_similars(PLine* plines, size_t len)
       new_group = true;
     } else {
       append(&group, sizeof(size_t), &curr_line.line_num);
-      /* add_similar(&group, curr_line.line_num); */
       ++i;
     }
   }
@@ -86,20 +84,19 @@ void find_similars(PLine* plines, size_t len)
 void end_group(Group* group, Groups* all_groups)
 {
   qsort(group->val, group->used, sizeof(size_t), cmp_size_t);
-
   add_group(*group, all_groups);
   group->used = 0;
 }
 
 void add_group(Group group, Groups* all_groups)
 {
-  size_t* new_group = (size_t*) malloc((group.used + 1) * sizeof(size_t));
+  size_t* new_group = (size_t*) malloc ((group.used + 1) * sizeof(size_t));
 
   if (!new_group)
     exit(1);
 
   memcpy(new_group, group.val, sizeof(size_t) * group.used);
-  /* brak wiersza zerowego -- mogę tak markować koniec */
+  /* brak wiersza zerowego -- mogę tak znaczyć koniec */
   new_group[group.used] = 0;
   append(all_groups, sizeof(size_t*), &new_group);
 }
@@ -158,17 +155,16 @@ int pline_cmp(const void* l1, const void* l2)
  *  (odpowiednio) @len1 i @len2 oraz o polach wielkości @size. Do porównania
  *  poszczególnych pól korzysta z funkcji @compare. */
 int arrays_cmp(const void* a1, size_t len1, const void* a2, size_t len2,
-               size_t size, int(*compare)(const void*, const void*))
+               size_t width, int(*compare)(const void*, const void*))
 {
   int cmp;
 
   if (len1 != len2)
     return (len1 < len2) ? (-1) : 1;
 
-  for (size_t i = 0; i < len1; ++i) {
-    if ((cmp = compare((char*)a1 + (i * size), (char*)a2 + (i * size))))
+  for (size_t i = 0; i < len1; ++i)
+    if ((cmp = compare((char*)a1 + (i * width), (char*)a2 + (i * width))))
       return cmp;
-  }
 
   return 0;
 }

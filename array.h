@@ -5,11 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* moduł arrays -- tutaj schowam też rzeczy, które nie są właściwe żadnemu z modułów */
+/* ogólne narzędzia do wygodnego operowania na tablicach dynamicznych. */
 
 #define SMALL_ARRAY 4
 #define BIG_ARRAY 16
-#define ARR_EXPAND 1.25
+/* #define ARR_EXPAND 1.25 */
 
 
 /**
@@ -17,7 +17,10 @@
 size_t new_len(size_t curr_len);
 
 /**
- * Nadklasa dynamicznych tablic. */
+ * "Nadklasa" dynamicznych tablic tj wzorzec dla innych. Powinny różnić się
+ * jedynie typem pola @val (tj. właściwą tablicą). Pola @used i @len to
+ * odpowiednio liczba zajętych bloków tablicy @val oraz jej faktyczna długość
+ * w pamięci. */
 typedef struct dyn_anything {
   size_t used, len;
   void* val;

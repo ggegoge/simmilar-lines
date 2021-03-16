@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# traceback obsługi błędów/sukcesów
 function ok {
     echo -e '\t' $1 ok!
 }

@@ -12,14 +12,12 @@
 int main(void)
 {
   PText text = init_ptext();
-
   read_text(&text);
   write_groups(text);
   free_text(text);
 
   return 0;
 }
-
 
 void read_text(PText* ptext)
 {
