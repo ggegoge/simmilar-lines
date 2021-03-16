@@ -61,7 +61,6 @@ PLine init_pline(size_t line_num)
   pline.nans.used = 0;
   pline.nans.val = (char**) malloc(pline.nans.len * sizeof(char*));
 
-
   return pline;
 }
 
@@ -70,7 +69,6 @@ void free_text(PText text)
 {
   for (size_t i = 0; i < text.used; ++i)
     free_line(text.val[i]);
-
 
   if (text.val) {
     free(text.val);
@@ -147,7 +145,8 @@ bool parse_real(PLine* pline, const char* s)
     return false;
 
   /* check if it is not a misbehaving integer. idk how toooo */
-  if (isfinite(num) && fabs(num) == (unsigned long long)fabs(num)) {
+  if (*err == '\0' && isfinite(num) &&
+      fabs(num) == (unsigned long long)fabs(num)) {
     if (fabs(num) <= ULLONG_MAX) {
       whole_num.abs = (unsigned long long) fabs(num);
 
