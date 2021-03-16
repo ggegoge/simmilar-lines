@@ -10,7 +10,6 @@
 
 void write_groups(PText t)
 {
-  printf("\n\nwypisuje grupy:\n");
   normalise(t.val, t.used);
   qsort(t.val, t.used, sizeof(PLine), pline_cmp);
   find_similars(t.val, t.used);

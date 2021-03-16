@@ -20,9 +20,6 @@ void readln(char** line_ptr, size_t* len, bool* is_eof, bool* is_comm)
   char c = getc(stdin);
 
   if ((*is_comm = c == '#')) {
-    /* przesunięcie aż do eofa/eola */
-    printf("istotnie, komentarz\n");
-
     while (!feof(stdin) && (c = getc(stdin)) != '\n');
   }
 
