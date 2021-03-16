@@ -17,7 +17,7 @@ similar_lines: $(OBJS)
 valgrind: similar_lines tests/my_ex.in
 	valgrind $(VGFLAGS) ./similar_lines <tests/my_ex.in
 
-main.o: main.c main.h
+main.o: main.c
 	$(CC) $(CFLAGS) -c main.c
 
 array.o: array.c array.h
