@@ -7,14 +7,9 @@
 
 /* ogólne narzędzia do wygodnego operowania na tablicach dynamicznych. */
 
-#define SMALL_ARRAY 4
+#define SMALL_ARRAY 1
 #define BIG_ARRAY 16
 /* #define ARR_EXPAND 1.25 */
-
-
-/**
- * Nowa długość dla tablicy w oparciu o @curr_len. */
-size_t new_len(size_t curr_len);
 
 /**
  * "Nadklasa" dynamicznych tablic tj wzorzec dla innych. Powinny różnić się
@@ -31,4 +26,9 @@ typedef struct dyn_anything {
  * wskazywanej przez @p, o elementach wielkości @width */
 void append(void* p, size_t width, void* new_el);
 
+/**
+ *  Inicjalizacja tablicy wskazywanej przez @p o elementach wielkości @width
+ *  na daną długość @len. */
+void init(void* p, size_t width, size_t len);
+  
 #endif /* ARRAY_H */

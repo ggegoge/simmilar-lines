@@ -34,33 +34,16 @@ PLine parseln(char* line, size_t line_num)
   return pline;
 }
 
-PText init_ptext()
-{
-  PText ptext;
-  ptext.len = BIG_ARRAY;
-  ptext.used = 0;
-  ptext.val = (PLine*) malloc(ptext.len * sizeof(PLine));
-  return ptext;
-}
-
 PLine init_pline(size_t line_num)
 {
   PLine pline;
   pline.line_num = line_num;
   pline.well_formed = true;
-
-  pline.wholes.len = SMALL_ARRAY;
-  pline.wholes.used = 0;
-  pline.wholes.val = (Whole*) malloc(pline.wholes.len * sizeof(Whole));
-
-  pline.reals.len = SMALL_ARRAY;
-  pline.reals.used = 0;
-  pline.reals.val = (double*) malloc(pline.reals.len * sizeof(double));
-
-  pline.nans.len = SMALL_ARRAY;
-  pline.nans.used = 0;
-  pline.nans.val = (char**) malloc(pline.nans.len * sizeof(char*));
-
+  
+  init(&pline.wholes, sizeof(Whole), SMALL_ARRAY);
+  init(&pline.reals, sizeof(double), SMALL_ARRAY);
+  init(&pline.nans, sizeof(char*), SMALL_ARRAY);
+  
   return pline;
 }
 
@@ -114,8 +97,9 @@ bool parse_whole(PLine* pline, const char* s)
 
   errno = 0;
 
+  /* przed liczbami 8kowymi i 16kowymi nie pojawi się znak? */
   if (is_sign)
-    num.abs = strtoull(s + 1, &err, 0);
+    num.abs = strtoull(s + 1, &err, 10);
   else
     num.abs = strtoull(s, &err, 0);
 

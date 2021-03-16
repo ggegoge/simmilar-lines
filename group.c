@@ -38,20 +38,9 @@ void find_similars(PLine* plines, size_t len)
   PLine group_line;
   Group group;
 
-  group.len = SMALL_ARRAY;
-  group.used = 0;
-  group.val = (size_t*) malloc(group.len * sizeof(size_t));
-
-  if (!group.val)
-    exit(1);
-
-  all_groups.len = BIG_ARRAY;
-  all_groups.used = 0;
-  all_groups.val = (size_t**) malloc(all_groups.len * sizeof(size_t**));
-
-  if (!all_groups.val)
-    exit(1);
-
+  init(&group, sizeof(size_t), SMALL_ARRAY);
+  init(&all_groups, sizeof(size_t**), BIG_ARRAY);
+  
   while (i < len) {
     curr_line = plines[i];
 

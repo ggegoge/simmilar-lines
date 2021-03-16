@@ -19,8 +19,11 @@ typedef struct whole {
   enum { PLUS, MINUS } sign;
 } Whole;
 
+/* Liczby rzeczywiste nazywam real i trzymam je jako double'e. Nie liczby
+ * nazywam nanami i trzymam je jako stringi */
+
 /* dynamiczne tablice dla każdego typu i podtypu słów. bazowane na DynArr
- * z modułu array. */
+ * z modułu array. objaśnienia pól ibidem */
 struct dyn_wholes {
   size_t used, len;
   Whole* val;
@@ -50,15 +53,13 @@ typedef struct parsed_line {
   struct dyn_nans nans;
 } PLine;
 
-/* kolejna dynamiczna tablica oparta na schemacie z array.h, tym razem jest to
- * PText tj parsed text -- przechowuje PLine'y. */
+/*  PText tj parsed text -- przechowuje PLine'y */
 typedef struct parsed_text {
   size_t used, len;
   PLine* val;
 } PText;
 
-/* inicjalizacja wartości oraz pamięci i jej zwalnianie dla PTextu i PLine */
-PText init_ptext();
+/* inicjalizacja wartości oraz pamięci i jej zwalnianie */
 PLine init_pline(size_t);
 void free_text(PText);
 void free_line(PLine);
