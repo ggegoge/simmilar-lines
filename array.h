@@ -7,15 +7,14 @@
 
 /* ogólne narzędzia do wygodnego operowania na tablicach dynamicznych. */
 
-#define SMALL_ARRAY 1
+#define SMALL_ARRAY 4
 #define BIG_ARRAY 16
-/* #define ARR_EXPAND 1.25 */
 
 /**
  * "Nadklasa" dynamicznych tablic tj wzorzec dla innych. Powinny różnić się
  * jedynie typem pola @val (tj. właściwą tablicą). Pola @used i @len to
  * odpowiednio liczba zajętych bloków tablicy @val oraz jej faktyczna długość
- * w pamięci. */
+ * w pamięci (albowiem alokuję ponad stan). */
 typedef struct dyn_anything {
   size_t used, len;
   void* val;

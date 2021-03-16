@@ -91,10 +91,10 @@
 
 ** how we do it now
    I use ~getline~ and keep this memory to allocate next lines.
-   Single func: ~readln~
+   thus i have  ~readln~ and ~read_text~
    
    
-** +old vers+
+** +old and dumb vers+
    All the input reading shall be done in the ~input~  module. I have two types decalared there
 ****   ~struct dyn_text~ vel *DText*
      A dynamic array storing lines of *DLine* type
@@ -116,10 +116,10 @@
       for each I have a structure ~Whole~ which stores the number's sign and absolute value
 ***** all the reals
 ***** all the nans
-*** The order
-**** parse whole
-**** parse real
-**** parse nan
+**** The order
+***** parse whole
+***** parse real
+***** parse nan
 ** Parsing different things  
 *** Word splitting
     I shoudl use ~strtok~ from C stdlib. It is a little bit /strange/ but as far as I understand it
@@ -137,67 +137,6 @@
     I use the ~strto*~ family ie ~strtoull~ and ~strtod~. I check the ~errno~ for ~ERANGE~ errors +
     I see whether everything is parsed. If not, the parsing unit returns false.
     
-***** COMMENT code (old)
-      #+begin_src C
-        /* POLYMORPHIC VARIANT */
-
-        int try_polymorphic(PLine* pline, const char* s, const char* format,
-                            void(*add)(PLine*, void*))
-        {
-          char val[256];
-
-          if (sscanf(s, format, &val)) {
-            add(pline, &val);
-            return 1;
-          } else
-            return 0;
-        }
-
-        void add_parsed_int(PLine* pline, void * val)
-        {
-          long long num = *(long long *)val;
-          pline->ints.used++;
-          if (pline->ints.used >= pline->ints.len) {
-            pline->ints.val = (long long *)realloc(pline->ints.val,pline->ints.len * sizeof(long long));
-    
-            if (!pline->ints.val)
-              fprintf(stderr, "REALLOC FAILURE");
-          }
-          pline->ints.val[pline->ints.used - 1] = num;
-        }
-
-        void add_parsed_float(PLine* pline, void * val)
-        {
-          double num = *(double *)val;
-          pline->floats.used++;
-          if (pline->floats.used >= pline->floats.len) {
-            pline->floats.val = (double *)realloc(pline->floats.val,pline->floats.len * sizeof(double));
-    
-            if (!pline->floats.val)
-              fprintf(stderr, "REALLOC FAILURE");
-          }
-          pline->floats.val[pline->floats.used - 1] = num;
-        }
-
-        void add_parsed_string(PLine* pline, void * val)
-        {
-          char* str = *(char** )val;
-          pline->nans.used++;
-          /* etc */
-        }
-
-        int try_parse(PLine* pline, const char* s)
-        {
-          if (try_polymorphic(pline, s, "%i", add_parsed_int) ||
-              try_polymorphic(pline, s, "%f", add_parsed_float) ||
-              try_polymorphic(pline, s, "%g", add_parsed_float) ||
-              try_polymorphic(pline, s, "%G", add_parsed_float) ||
-              try_polymorphic(pline, s, "%s", add_parsed_string) ||)
-
-        }
-      #+end_src
-
-
 * Group
   I have a function that finds similars, each is normalised etc. a lot of qsorting all aroun.
 

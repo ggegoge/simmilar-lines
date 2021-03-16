@@ -8,7 +8,8 @@
 #include "group.h"
 
 
-/* komparatory: */
+/* komparatory, zadeklaruję te nudy tutaj by nie była ich implementacja
+ * pierwszą widzianą rzeczą. */
 static int arrays_cmp(const void* a1, size_t len1, const void* a2, size_t len2,
                       size_t width, int(*compare)(const void*, const void*));
 static int pline_cmp(const void*, const void*);
@@ -31,27 +32,20 @@ static void normalise(PLine* plines, size_t len)
 }
 
 /**
- * Dodanie zrobionej grupy. */
-static void add_group(Group group, Groups* all_groups)
-{
-  size_t* new_group = (size_t*) malloc ((group.used + 1) * sizeof(size_t));
-
-  if (!new_group)
-    exit(1);
-
-  memcpy(new_group, group.val, sizeof(size_t) * group.used);
-  /* brak wiersza zerowego -- mogę tak znaczyć koniec */
-  new_group[group.used] = 0;
-  append(all_groups, sizeof(size_t*), &new_group);
-}
-
-/**
  *  Procedura zakończenia przetwarzania obecnej grupy i dodanie jej do tablicy
  *  wszystkich grup. */
 void end_group(Group* group, Groups* all_groups)
 {
+  size_t* new_group;
   qsort(group->val, group->used, sizeof(size_t), cmp_size_t);
-  add_group(*group, all_groups);
+  new_group = (size_t*) malloc ((group->used + 1) * sizeof(size_t));
+
+  if (!new_group)
+    exit(1);
+
+  memcpy(new_group, group->val, sizeof(size_t) * group->used);
+  new_group[group->used] = 0;
+  append(all_groups, sizeof(size_t*), &new_group);
   group->used = 0;
 }
 
@@ -62,25 +56,12 @@ void print_all_groups(Groups all_groups)
   size_t i, j;
 
   for (i = 0; i < all_groups.used; ++i) {
-    j = 0;
-
-    while (all_groups.val[i][j + 1] != 0) {
+    for (j = 0; all_groups.val[i][j + 1] != 0; ++j)
       printf("%lu ", all_groups.val[i][j]);
-      ++j;
-    }
 
+    /* ostatni element ma \n, nie spację */
     printf("%lu\n", all_groups.val[i][j]);
   }
-}
-
-/**
- * Zwolnienie pamięci grup. */
-void free_groups(Groups all_groups)
-{
-  for (size_t i = 0; i < all_groups.used; ++i)
-    free(all_groups.val[i]);
-
-  free(all_groups.val);
 }
 
 /**
@@ -91,8 +72,7 @@ static void find_similars(PLine* plines, size_t len)
   Groups all_groups;
   bool new_group = true;
   size_t i = 0;
-  PLine curr_line;
-  PLine group_line;
+  PLine curr_line, group_line;
   Group group;
 
   init(&group, sizeof(size_t), SMALL_ARRAY);
@@ -102,25 +82,32 @@ static void find_similars(PLine* plines, size_t len)
     curr_line = plines[i];
 
     if (new_group) {
+      /* brak wzorca do porównania - nówka grupka */
       group_line = curr_line;
       append(&group, sizeof(size_t), &curr_line.line_num);
       new_group = !new_group;
       ++i;
     } else if (pline_cmp(&curr_line, &group_line)) {
+      /* linijka różna od wzorca */
       end_group(&group, &all_groups);
       new_group = true;
     } else {
+      /* linijki są równe */
       append(&group, sizeof(size_t), &curr_line.line_num);
       ++i;
     }
   }
-
+  /* grupa skończona mid file */
   if (group.used != 0)
     end_group(&group, &all_groups);
 
   qsort(all_groups.val, all_groups.used, sizeof(size_t*), cmp_size_t_p);
   print_all_groups(all_groups);
-  free_groups(all_groups);
+
+  for (i = 0; i < all_groups.used; ++i)
+    free(all_groups.val[i]);
+
+  free(all_groups.val);
   free(group.val);
 }
 
@@ -134,31 +121,26 @@ void write_groups(PText t)
 }
 
 
-/* komparatory */
+/* komparatory. Zasadniczo:
+ *   cmp(a, b) = if a < b then -1 else if a > b then 1 else 0,
+ * prócz porównań na zwykłych liczbach, gdzie prościej jest zwrócić różnicę.  */
 
-/**
- *  Funkcja porównująca wiersze @l1 oraz @l2. Jak wszystkie funkcje porównujące
- *  w tym pliku, zwraca (-1) gdy @l1 < @l2, 0 gdy @l1 = @l2 i 1 gdy @l1 > @l2. */
 static int pline_cmp(const void* l1, const void* l2)
 {
   PLine pl1 = *(PLine*)l1;
   PLine pl2 = *(PLine*)l2;
   int cmp;
 
+  /* pierwsza nierówność lub równość */
   if ((cmp = arrays_cmp(pl1.wholes.val, pl1.wholes.used, pl2.wholes.val,
-                        pl2.wholes.used, sizeof(Whole), cmp_whole)))
-    return cmp;
-
-  if ((cmp = arrays_cmp(pl1.reals.val, pl1.reals.used, pl2.reals.val,
-                        pl2.reals.used, sizeof(double), cmp_real)))
-    return cmp;
-
-  if ((cmp = arrays_cmp(pl1.nans.val, pl1.nans.used, pl2.nans.val,
+                        pl2.wholes.used, sizeof(Whole), cmp_whole)) ||
+      (cmp = arrays_cmp(pl1.reals.val, pl1.reals.used, pl2.reals.val,
+                        pl2.reals.used, sizeof(double), cmp_real)) ||
+      (cmp = arrays_cmp(pl1.nans.val, pl1.nans.used, pl2.nans.val,
                         pl2.nans.used, sizeof(char*), cmp_nan)))
     return cmp;
-
-
-  return 0;
+  else
+    return 0;
 }
 
 /**
@@ -182,20 +164,22 @@ static int arrays_cmp(const void* a1, size_t len1, const void* a2, size_t len2,
 
 
 /**
- *  Funkcja porównujące dwie liczby @a i @b całkowite typu @Whole. */
+ *  Funkcja porównujące dwie liczby @a i @b całkowite typu @Whole.
+ *  Najpierw po znaku (- < +), później po wartości absolutnej. */
 static int cmp_whole(const void* a, const void* b)
 {
   Whole n1 = *(Whole*)a;
   Whole n2 = *(Whole*)b;
 
-  /* porównanie co do znaku i odpowiedniej wartości absolutnej */
+  /* porównanie co do znaku i odpowiedniej wartości absolutnej.
+   * test odejmowawczy odpada, ponieważ może przebić się zakres rozwalić jakoś.
+   * Przeto ifologia */
   if (n1.sign == n2.sign) {
     if (n1.sign == MINUS) {
       if (n1.abs != n2.abs)
         return (n1.abs < n2.abs) ? 1 : (-1);
       else
         return 0;
-
     } else {
       if (n1.abs != n2.abs)
         return (n1.abs < n2.abs) ? (-1) : 1;
@@ -208,6 +192,7 @@ static int cmp_whole(const void* a, const void* b)
 
 static int cmp_real(const void* x, const void* y)
 {
+  /* test odejmowawczy nie sprawdziłby się, albowiem inf - inf = ? */
   double n1 = *(double*)x;
   double n2 = *(double*)y;
 

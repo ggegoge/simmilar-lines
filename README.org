@@ -1,4 +1,11 @@
 #+TITLE: Wierszarz
 
 Pierwsze zadanie na IPP.
-Polecenie w pliku [[file:polecenie.org][polecenie.org]], szkopuły w [[file:pytania.org][pytania.org]].
+Polecenie w pliku [[file:polecenie.org][polecenie.org]], szkopuły w [[file:dev.org][dev.org]].
+
+Na dzień 17.03 projekt można uznać za wyszedły z fazy \alpha.
+
+Tj. działa.
+
+*** użycie
+    Kompilacja za pomocą ~make~.

@@ -44,11 +44,11 @@ static PLine init_pline(size_t line_num)
   PLine pline;
   pline.line_num = line_num;
   pline.well_formed = true;
-  
+
   init(&pline.wholes, sizeof(Whole), SMALL_ARRAY);
   init(&pline.reals, sizeof(double), SMALL_ARRAY);
   init(&pline.nans, sizeof(char*), SMALL_ARRAY);
-  
+
   return pline;
 }
 
@@ -58,11 +58,7 @@ void free_text(PText text)
   for (size_t i = 0; i < text.used; ++i)
     free_line(text.val[i]);
 
-  if (text.val) {
-    free(text.val);
-    text.val = NULL;
-  }
-
+  free(text.val);
 }
 
 void free_line(PLine line)
@@ -74,7 +70,6 @@ void free_line(PLine line)
     free(line.nans.val[i]);
 
   free(line.nans.val);
-
 }
 
 static bool parse_whole(PLine* pline, const char* s)
@@ -113,20 +108,20 @@ static bool parse_real(PLine* pline, const char* s)
   Whole whole_num;
   char* err;
 
-  /* it is not a real number but a too large of an integer */
+  /* nie chcę tu łapać za dużych intów z notacji intowej, sprawdzam czy wywołany
+   * wcześniej parse_whole nie ustawił ostrzeżenia. */
   if (errno == ERANGE)
     return false;
 
   errno = 0;
   num = strtod(s, &err);
 
-  /* nan is a nan as the name specifies */
-  if (isnan(num))
+  /* odchodzimy odczyt się nie udał */
+  if (*err != '\0' || errno == ERANGE || isnan(num))
     return false;
 
-  /* check if it is not a misbehaving integer. idk how toooo */
-  if (*err == '\0' && isfinite(num) &&
-      fabs(num) == (unsigned long long)fabs(num)) {
+  /* sprawdźmy, czy to nie jest int w przebraniu floata */
+  if (isfinite(num) && fabs(num) == (unsigned long long)fabs(num)) {
     if (fabs(num) <= ULLONG_MAX) {
       whole_num.abs = (unsigned long long) fabs(num);
 
@@ -140,13 +135,9 @@ static bool parse_real(PLine* pline, const char* s)
     }
   }
 
-  if (*err != '\0' || errno == ERANGE)
-    return false;
-  else {
-    append(&pline->reals, sizeof(double), &num);
-    return true;
-  }
-
+  /* ostatnia możliwość: to istotnie liczba rzeczywista */
+  append(&pline->reals, sizeof(double), &num);
+  return true;
 }
 
 static void new_parsed_nan(PLine* pline, const char* s)
@@ -170,7 +161,6 @@ static void parse(PLine* pline, const char* word)
 
   new_parsed_nan(pline, word);
 }
-
 
 
 static bool check_word(char* w, size_t line_num)
