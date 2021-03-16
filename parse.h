@@ -39,7 +39,6 @@ struct dyn_nans {
   char** val;
 };
 
-
 /**
  * Pojedynczy przerobiony wiersz (ang. parsed line --> PLine).
  * Trzyma nr linii @line_num, w @well_formed informację czy ta jest akceptowalna
@@ -60,7 +59,7 @@ typedef struct parsed_text {
 } PText;
 
 /* inicjalizacja wartości oraz pamięci i jej zwalnianie */
-PLine init_pline(size_t);
+
 void free_text(PText);
 void free_line(PLine);
 
@@ -68,23 +67,10 @@ void free_line(PLine);
  * przetworzenie pojedynczej linii @line czyli @line_num-tego wiersza. */
 PLine parseln(char* line, size_t line_num);
 
-/* Sprawdzenie legalności słowa tj przynależności znaków do assi-kresu [33, 126] */
-bool check_word(char*, size_t);
-
-/**
- * przetwarzenie słowa @word i zapisanie go w @pline. */
-void parse(PLine* pline, const char* word);
 
 bool parsell(PLine*, const char*);
 bool parseull(PLine*, const char*);
 bool parsed(PLine*, const char*);
 bool parsestr(PLine, const char*);
-
-/* hideous names: */
-bool parse_whole(PLine*, const char*);
-bool parse_real(PLine*, const char*);
-
-/* alokacja pamięci pod nieliczby */
-void new_parsed_nan(PLine*, const char*);
 
 #endif /* PARSE_H */

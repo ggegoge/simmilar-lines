@@ -8,6 +8,11 @@
 #include "array.h"
 #include "parse.h"
 
+static PLine init_pline(size_t);
+static bool check_word(char*, size_t);
+static void parse(PLine* pline, const char* word);
+
+
 PLine parseln(char* line, size_t line_num)
 {
   PLine pline = init_pline(line_num);
@@ -34,7 +39,7 @@ PLine parseln(char* line, size_t line_num)
   return pline;
 }
 
-PLine init_pline(size_t line_num)
+static PLine init_pline(size_t line_num)
 {
   PLine pline;
   pline.line_num = line_num;
@@ -72,16 +77,7 @@ void free_line(PLine line)
 
 }
 
-void parse(PLine* pline, const char* word)
-{
-  if (parse_whole(pline, word) || parse_real(pline, word))
-    return;
-
-  new_parsed_nan(pline, word);
-}
-
-
-bool parse_whole(PLine* pline, const char* s)
+static bool parse_whole(PLine* pline, const char* s)
 {
   Whole num;
   bool is_sign = (s[0] == '+' || s[0] == '-');
@@ -111,7 +107,7 @@ bool parse_whole(PLine* pline, const char* s)
   }
 }
 
-bool parse_real(PLine* pline, const char* s)
+static bool parse_real(PLine* pline, const char* s)
 {
   double num;
   Whole whole_num;
@@ -153,8 +149,7 @@ bool parse_real(PLine* pline, const char* s)
 
 }
 
-
-void new_parsed_nan(PLine* pline, const char* s)
+static void new_parsed_nan(PLine* pline, const char* s)
 {
   char* new_nan = (char*) malloc(strlen(s) + 1);
 
@@ -168,7 +163,17 @@ void new_parsed_nan(PLine* pline, const char* s)
     pline->nans.val[pline->nans.used - 1][i] = tolower(s[i]);
 }
 
-bool check_word(char* w, size_t line_num)
+static void parse(PLine* pline, const char* word)
+{
+  if (parse_whole(pline, word) || parse_real(pline, word))
+    return;
+
+  new_parsed_nan(pline, word);
+}
+
+
+
+static bool check_word(char* w, size_t line_num)
 {
   for (size_t i = 0; i < strlen(w); ++i) {
     if (w[i] < MIN_WORD_ASCII || w[i] > MAX_WORD_ASCII) {

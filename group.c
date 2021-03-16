@@ -8,16 +8,20 @@
 #include "group.h"
 
 
-void write_groups(PText t)
-{
-  normalise(t.val, t.used);
-  qsort(t.val, t.used, sizeof(PLine), pline_cmp);
-  find_similars(t.val, t.used);
-}
+/* komparatory: */
+static int arrays_cmp(const void* a1, size_t len1, const void* a2, size_t len2,
+                      size_t width, int(*compare)(const void*, const void*));
+static int pline_cmp(const void*, const void*);
+static int cmp_whole(const void*, const void*);
+static int cmp_real(const void*, const void*);
+static int cmp_nan(const void*, const void*);
+static int cmp_size_t(const void*, const void*);
+static int cmp_size_t_p(const void*, const void*);
+
 
 /**
  * Normalizacja sparsowanych linijek z tablicy @plines długości @len. */
-void normalise(PLine* plines, size_t len)
+static void normalise(PLine* plines, size_t len)
 {
   for (size_t i = 0; i < len; ++i) {
     qsort(plines[i].wholes.val, plines[i].wholes.used, sizeof(Whole), cmp_whole);
@@ -27,9 +31,62 @@ void normalise(PLine* plines, size_t len)
 }
 
 /**
+ * Dodanie zrobionej grupy. */
+static void add_group(Group group, Groups* all_groups)
+{
+  size_t* new_group = (size_t*) malloc ((group.used + 1) * sizeof(size_t));
+
+  if (!new_group)
+    exit(1);
+
+  memcpy(new_group, group.val, sizeof(size_t) * group.used);
+  /* brak wiersza zerowego -- mogę tak znaczyć koniec */
+  new_group[group.used] = 0;
+  append(all_groups, sizeof(size_t*), &new_group);
+}
+
+/**
+ *  Procedura zakończenia przetwarzania obecnej grupy i dodanie jej do tablicy
+ *  wszystkich grup. */
+void end_group(Group* group, Groups* all_groups)
+{
+  qsort(group->val, group->used, sizeof(size_t), cmp_size_t);
+  add_group(*group, all_groups);
+  group->used = 0;
+}
+
+/**
+ * Właściwe wypisanie wszystkich grup.  */
+void print_all_groups(Groups all_groups)
+{
+  size_t i, j;
+
+  for (i = 0; i < all_groups.used; ++i) {
+    j = 0;
+
+    while (all_groups.val[i][j + 1] != 0) {
+      printf("%lu ", all_groups.val[i][j]);
+      ++j;
+    }
+
+    printf("%lu\n", all_groups.val[i][j]);
+  }
+}
+
+/**
+ * Zwolnienie pamięci grup. */
+void free_groups(Groups all_groups)
+{
+  for (size_t i = 0; i < all_groups.used; ++i)
+    free(all_groups.val[i]);
+
+  free(all_groups.val);
+}
+
+/**
  * Znajdywanie podobncyh sparsowanych (zał.: unormalizowanych) linijek w @plines
  * zakładając, że jest to tablica posortowana. @len to jej długość. */
-void find_similars(PLine* plines, size_t len)
+static void find_similars(PLine* plines, size_t len)
 {
   Groups all_groups;
   bool new_group = true;
@@ -40,7 +97,7 @@ void find_similars(PLine* plines, size_t len)
 
   init(&group, sizeof(size_t), SMALL_ARRAY);
   init(&all_groups, sizeof(size_t**), BIG_ARRAY);
-  
+
   while (i < len) {
     curr_line = plines[i];
 
@@ -68,56 +125,21 @@ void find_similars(PLine* plines, size_t len)
 }
 
 
-/**
- *  Procedura zakończenia przetwarzania obecnej grupy @group. */
-void end_group(Group* group, Groups* all_groups)
+void write_groups(PText t)
 {
-  qsort(group->val, group->used, sizeof(size_t), cmp_size_t);
-  add_group(*group, all_groups);
-  group->used = 0;
+  normalise(t.val, t.used);
+  /* sortuję wszystkie linijki aby potem łatwo znaleźć duplikaty */
+  qsort(t.val, t.used, sizeof(PLine), pline_cmp);
+  find_similars(t.val, t.used);
 }
 
-void add_group(Group group, Groups* all_groups)
-{
-  size_t* new_group = (size_t*) malloc ((group.used + 1) * sizeof(size_t));
 
-  if (!new_group)
-    exit(1);
-
-  memcpy(new_group, group.val, sizeof(size_t) * group.used);
-  /* brak wiersza zerowego -- mogę tak znaczyć koniec */
-  new_group[group.used] = 0;
-  append(all_groups, sizeof(size_t*), &new_group);
-}
-
-void print_all_groups(Groups all_groups)
-{
-  size_t i, j;
-
-  for (i = 0; i < all_groups.used; ++i) {
-    j = 0;
-
-    while (all_groups.val[i][j + 1] != 0) {
-      printf("%lu ", all_groups.val[i][j]);
-      ++j;
-    }
-
-    printf("%lu\n", all_groups.val[i][j]);
-  }
-}
-
-void free_groups(Groups all_groups)
-{
-  for (size_t i = 0; i < all_groups.used; ++i)
-    free(all_groups.val[i]);
-
-  free(all_groups.val);
-}
+/* komparatory */
 
 /**
  *  Funkcja porównująca wiersze @l1 oraz @l2. Jak wszystkie funkcje porównujące
  *  w tym pliku, zwraca (-1) gdy @l1 < @l2, 0 gdy @l1 = @l2 i 1 gdy @l1 > @l2. */
-int pline_cmp(const void* l1, const void* l2)
+static int pline_cmp(const void* l1, const void* l2)
 {
   PLine pl1 = *(PLine*)l1;
   PLine pl2 = *(PLine*)l2;
@@ -143,8 +165,8 @@ int pline_cmp(const void* l1, const void* l2)
  *  Polimorficzna funkcja porównująca tablice @a1 i @a2 o długościach
  *  (odpowiednio) @len1 i @len2 oraz o polach wielkości @size. Do porównania
  *  poszczególnych pól korzysta z funkcji @compare. */
-int arrays_cmp(const void* a1, size_t len1, const void* a2, size_t len2,
-               size_t width, int(*compare)(const void*, const void*))
+static int arrays_cmp(const void* a1, size_t len1, const void* a2, size_t len2,
+                      size_t width, int(*compare)(const void*, const void*))
 {
   int cmp;
 
@@ -158,23 +180,23 @@ int arrays_cmp(const void* a1, size_t len1, const void* a2, size_t len2,
   return 0;
 }
 
+
 /**
  *  Funkcja porównujące dwie liczby @a i @b całkowite typu @Whole. */
-int cmp_whole(const void* a, const void* b)
+static int cmp_whole(const void* a, const void* b)
 {
   Whole n1 = *(Whole*)a;
   Whole n2 = *(Whole*)b;
 
+  /* porównanie co do znaku i odpowiedniej wartości absolutnej */
   if (n1.sign == n2.sign) {
     if (n1.sign == MINUS) {
-
       if (n1.abs != n2.abs)
         return (n1.abs < n2.abs) ? 1 : (-1);
       else
         return 0;
 
     } else {
-
       if (n1.abs != n2.abs)
         return (n1.abs < n2.abs) ? (-1) : 1;
       else
@@ -184,9 +206,7 @@ int cmp_whole(const void* a, const void* b)
     return (n1.sign == MINUS && n2.sign == PLUS) ? (-1) : 1;
 }
 
-/**
- * Funkcja służąca porównaniu liczb rzeczywistych @x i @y typu @double. */
-int cmp_real(const void* x, const void* y)
+static int cmp_real(const void* x, const void* y)
 {
   double n1 = *(double*)x;
   double n2 = *(double*)y;
@@ -197,22 +217,17 @@ int cmp_real(const void* x, const void* y)
     return 0;
 }
 
-/**
- *  Porównywanie nieliczb. De facto wrapper wokół stdlibowej strcmp. Dostaje
- *  wskaźniki na stringi @sp1 i @sp2, które porównuje. */
-int cmp_nan(const void* sp1, const void* sp2)
+static int cmp_nan(const void* sp1, const void* sp2)
 {
   return strcmp(*(char**)sp1, *(char**)sp2);
 }
 
-/**
- * Porównanie zmiennych typu size_t. */
-int cmp_size_t(const void* a, const void* b)
+static int cmp_size_t(const void* a, const void* b)
 {
   return *(size_t*)a - *(size_t*)b;
 }
 
-int cmp_size_t_p(const void* a, const void* b)
+static int cmp_size_t_p(const void* a, const void* b)
 {
-  return **(size_t**)a -** (size_t**)b;
+  return (**(size_t**)a) - (**(size_t**)b);
 }

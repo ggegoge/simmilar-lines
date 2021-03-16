@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-void readln(char**, size_t*, bool*, bool*);
+#include "parse.h"
+
+void read_text(PText*);
 
 #endif /* INPUT_H */
