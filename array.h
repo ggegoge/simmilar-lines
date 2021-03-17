@@ -7,7 +7,7 @@
 
 /* ogólne narzędzia do wygodnego operowania na tablicach dynamicznych. */
 
-#define SMALL_ARRAY 4
+#define SMALL_ARRAY 8
 #define BIG_ARRAY 16
 
 /**
@@ -19,6 +19,9 @@ typedef struct dyn_anything {
   size_t used, len;
   void* val;
 } DynArr;
+
+/* co prawda nie eksportuję powyższej struktury, ale jako wzorzec niech będzie
+ * wyeksponowana tutaj. */
 
 /**
  * Polimorficzne dodanie elementu pod adresem @new_el do dynamicznej tablicy

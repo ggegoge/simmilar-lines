@@ -74,7 +74,9 @@ static void find_similars(PLine* plines, size_t len)
   size_t i = 0;
   PLine curr_line, group_line;
   Group group;
-
+  
+  if (len == 0)
+    return;
   init(&group, sizeof(size_t), SMALL_ARRAY);
   init(&all_groups, sizeof(size_t**), BIG_ARRAY);
 

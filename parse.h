@@ -59,9 +59,8 @@ typedef struct parsed_text {
 } PText;
 
 /* inicjalizacja wartości oraz pamięci i jej zwalnianie */
-
+void init_ptext(PText* ptext);
 void free_text(PText);
-void free_line(PLine);
 
 /**
  * przetworzenie pojedynczej linii @line czyli @line_num-tego wiersza. */

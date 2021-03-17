@@ -46,10 +46,12 @@ void read_text(PText* ptext)
     if (!is_comm && !is_eof) {
       pline = parseln(line, line_num);
 
-      if (pline.well_formed)
+      if (pline.well_formed) {
+        if (ptext->len == 0)
+          init(ptext, sizeof(PLine), BIG_ARRAY);
+
         append(ptext, sizeof(PLine), &pline);
-      else
-        free_line(pline);
+      }
     }
 
     ++line_num;

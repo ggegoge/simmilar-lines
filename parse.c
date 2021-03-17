@@ -9,29 +9,26 @@
 #include "parse.h"
 
 static PLine init_pline(size_t);
-static bool check_word(char*, size_t);
+static void free_line(PLine);
+static bool check_line(char* s, size_t line_num);
 static void parse(PLine* pline, const char* word);
 
 
 PLine parseln(char* line, size_t line_num)
 {
-  PLine pline = init_pline(line_num);
+  PLine pline;
   char* word = NULL;
   char* delims = " \t\n\v\f\r";
 
-  word = strtok(line, delims);
-
-  /* pusta linia? */
-  if (!word) {
+  /* sprawdzian zakresu i pustości */
+  if (!check_line(line, line_num) || !(word = strtok(line, delims))) {
     pline.well_formed = false;
     return pline;
   }
 
-  while (word) {
-    /* sprawdzian, czy znaki spelniaja zalozenia */
-    if (!(pline.well_formed = check_word(word, line_num)))
-      return pline;
+  pline = init_pline(line_num);
 
+  while (word) {
     parse(&pline, word);
     word = strtok(NULL, delims);
   }
@@ -44,24 +41,21 @@ static PLine init_pline(size_t line_num)
   PLine pline;
   pline.line_num = line_num;
   pline.well_formed = true;
-
-  init(&pline.wholes, sizeof(Whole), SMALL_ARRAY);
-  init(&pline.reals, sizeof(double), SMALL_ARRAY);
-  init(&pline.nans, sizeof(char*), SMALL_ARRAY);
+  init(&pline.wholes, sizeof(Whole), 0);
+  init(&pline.reals, sizeof(double), 0);
+  init(&pline.nans, sizeof(char*), 0);
 
   return pline;
 }
 
-
-void free_text(PText text)
+void init_ptext(PText* ptext)
 {
-  for (size_t i = 0; i < text.used; ++i)
-    free_line(text.val[i]);
-
-  free(text.val);
+  ptext->len = 0;
+  ptext->used = 0;
+  ptext->val = NULL;
 }
 
-void free_line(PLine line)
+static void free_line(PLine line)
 {
   free(line.reals.val);
   free(line.wholes.val);
@@ -71,6 +65,15 @@ void free_line(PLine line)
 
   free(line.nans.val);
 }
+
+void free_text(PText text)
+{
+  for (size_t i = 0; i < text.used; ++i)
+    free_line(text.val[i]);
+
+  free(text.val);
+}
+
 
 static bool parse_whole(PLine* pline, const char* s)
 {
@@ -100,6 +103,10 @@ static bool parse_whole(PLine* pline, const char* s)
   else {
     if (num.abs == 0)
       num.sign = PLUS;
+
+    if (pline->wholes.len == 0)
+      init(&pline->wholes, sizeof(Whole), SMALL_ARRAY);
+
     append(&pline->wholes, sizeof(Whole), &num);
     return true;
   }
@@ -113,34 +120,40 @@ static bool parse_real(PLine* pline, const char* s)
 
   /* nie chcę tu łapać za dużych intów z notacji intowej, sprawdzam czy wywołany
    * wcześniej parse_whole nie ustawił ostrzeżenia. Also: strtod nie ma opcji
-   * specyfikacji systemy liczb, zatem odrzucone hexy typu +0x... -0x...
+   * specyfikacji systemu liczb, zatem odrzucone hexy typu +0x... -0x...
    * muszę ręcznie odrzucać po małpiemu. */
   if (errno == ERANGE || s[2] == 'x')
     return false;
 
   errno = 0;
   num = strtod(s, &err);
-  
-  /* odchodzimy odczyt się nie udał */
+
+  /* czy poprawna rzeczywista */
   if (*err != '\0' || errno == ERANGE || isnan(num))
     return false;
 
   /* sprawdźmy, czy to nie jest int w przebraniu floata */
-  if (isfinite(num) && fabs(num) == (unsigned long long)fabs(num)) {
+  if (isfinite(num) && fabs(num) == (unsigned long long) fabs(num)) {
     if (fabs(num) <= ULLONG_MAX) {
       whole_num.abs = (unsigned long long) fabs(num);
-      
+
       if (num >= 0)
         whole_num.sign = PLUS;
       else
         whole_num.sign = MINUS;
+
+      if (pline->wholes.len == 0)
+        init(&pline->wholes, sizeof(Whole), SMALL_ARRAY);
 
       append(&pline->wholes, sizeof(Whole), &whole_num);
       return true;
     }
   }
 
-  /* ostatnia możliwość: to istotnie liczba rzeczywista */
+  /* to istotnie liczba rzeczywista */
+  if (pline->reals.len == 0)
+    init(&pline->reals, sizeof(double), SMALL_ARRAY);
+
   append(&pline->reals, sizeof(double), &num);
   return true;
 }
@@ -153,6 +166,10 @@ static void new_parsed_nan(PLine* pline, const char* s)
     exit(1);
 
   strcpy(new_nan, s);
+
+  if (pline->nans.len == 0)
+    init(&pline->nans, sizeof(char*), SMALL_ARRAY);
+
   append(&pline->nans, sizeof(char*), &new_nan);
 
   for (size_t i = 0; i < strlen(s); ++i)
@@ -161,17 +178,15 @@ static void new_parsed_nan(PLine* pline, const char* s)
 
 static void parse(PLine* pline, const char* word)
 {
-  if (parse_whole(pline, word) || parse_real(pline, word))
-    return;
-
-  new_parsed_nan(pline, word);
+  if (!(parse_whole(pline, word) || parse_real(pline, word)))
+    new_parsed_nan(pline, word);
 }
 
-
-static bool check_word(char* w, size_t line_num)
+/* sprawdzian zakresu znakow */
+static bool check_line(char* s, size_t line_num)
 {
-  for (size_t i = 0; i < strlen(w); ++i) {
-    if (w[i] < MIN_WORD_ASCII || w[i] > MAX_WORD_ASCII) {
+  for (size_t i = 0; i < strlen(s); ++i) {
+    if (!isspace(s[i]) && (s[i] < MIN_WORD_ASCII || s[i] > MAX_WORD_ASCII)) {
       fprintf(stderr, "ERROR %lu\n", line_num);
       return false;
     }

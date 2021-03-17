@@ -11,7 +11,7 @@
 int main(void)
 {
   PText text;
-  init(&text, sizeof(PLine), BIG_ARRAY);
+  init(&text, sizeof(PLine), 0);
   read_text(&text);
   write_groups(text);
   free_text(text);
