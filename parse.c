@@ -98,6 +98,8 @@ static bool parse_whole(PLine* pline, const char* s)
   if (strcmp(s, "0x") != 0 && (*err != '\0' || errno == ERANGE))
     return false;
   else {
+    if (num.abs == 0)
+      num.sign = PLUS;
     append(&pline->wholes, sizeof(Whole), &num);
     return true;
   }
@@ -128,7 +130,7 @@ static bool parse_real(PLine* pline, const char* s)
     if (fabs(num) <= ULLONG_MAX) {
       whole_num.abs = (unsigned long long) fabs(num);
       
-      if (num > 0)
+      if (num >= 0)
         whole_num.sign = PLUS;
       else
         whole_num.sign = MINUS;
