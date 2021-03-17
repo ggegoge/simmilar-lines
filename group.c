@@ -21,7 +21,8 @@ static int cmp_size_t_p(const void*, const void*);
 
 
 /**
- * Normalizacja sparsowanych linijek z tablicy @plines długości @len. */
+ * Normalizacja sparsowanych linijek z tablicy @plines długości @len,
+ * poprzez ułożenie ichnich wielozbiorów w kolejności rosnącej. */
 static void normalise(PLine* plines, size_t len)
 {
   for (size_t i = 0; i < len; ++i) {
@@ -32,8 +33,8 @@ static void normalise(PLine* plines, size_t len)
 }
 
 /**
- *  Procedura zakończenia przetwarzania obecnej grupy i dodanie jej do tablicy
- *  wszystkich grup. */
+ *  Procedura zakończenia przetwarzania obecnej @group-y i dodanie jej do tablicy
+ *  wszystkich @groups */
 void end_group(Group* group, Groups* all_groups)
 {
   size_t* new_group;
@@ -43,6 +44,7 @@ void end_group(Group* group, Groups* all_groups)
   if (!new_group)
     exit(1);
 
+  /* zapisuję tam tabliczkę indeksów */
   memcpy(new_group, group->val, sizeof(size_t) * group->used);
   new_group[group->used] = 0;
   append(all_groups, sizeof(size_t*), &new_group);
@@ -65,18 +67,20 @@ void print_all_groups(Groups all_groups)
 }
 
 /**
- * Znajdywanie podobncyh sparsowanych (zał.: unormalizowanych) linijek w @plines
- * zakładając, że jest to tablica posortowana. @len to jej długość. */
+ * Znajdywanie podobnych sparsowanych (zał.: unormalizowanych) linijek w @plines
+ * zakładając, że jest to tablica posortowana. */
 static void find_similars(PLine* plines, size_t len)
 {
   Groups all_groups;
   bool new_group = true;
   size_t i = 0;
+  /* obecnie rozważana linijka i wzorzec obecnie rozwijanej grupy */
   PLine curr_line, group_line;
   Group group;
-  
+
   if (len == 0)
     return;
+
   init(&group, sizeof(size_t), SMALL_ARRAY);
   init(&all_groups, sizeof(size_t**), BIG_ARRAY);
 
@@ -99,10 +103,12 @@ static void find_similars(PLine* plines, size_t len)
       ++i;
     }
   }
-  /* grupa skończona mid file */
+
+  /* edge case grupy skończonej mid file */
   if (group.used != 0)
     end_group(&group, &all_groups);
 
+  /* output w kolejnosci nr wierszy */
   qsort(all_groups.val, all_groups.used, sizeof(size_t*), cmp_size_t_p);
   print_all_groups(all_groups);
 
@@ -133,7 +139,7 @@ static int pline_cmp(const void* l1, const void* l2)
   PLine pl2 = *(PLine*)l2;
   int cmp;
 
-  /* pierwsza nierówność lub równość */
+  /* pierwsza nierówność oznacza nierówość */
   if ((cmp = arrays_cmp(pl1.wholes.val, pl1.wholes.used, pl2.wholes.val,
                         pl2.wholes.used, sizeof(Whole), cmp_whole)) ||
       (cmp = arrays_cmp(pl1.reals.val, pl1.reals.used, pl2.reals.val,
@@ -163,7 +169,6 @@ static int arrays_cmp(const void* a1, size_t len1, const void* a2, size_t len2,
 
   return 0;
 }
-
 
 /**
  *  Funkcja porównujące dwie liczby @a i @b całkowite typu @Whole.

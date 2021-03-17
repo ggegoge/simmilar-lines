@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# i=0
+# all_errors tablica
+
 # traceback obsługi błędów/sukcesów
 function ok {
     printf "\t$*\e[1;32m ok!\e[0m\n"

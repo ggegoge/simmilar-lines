@@ -2,6 +2,17 @@
 
 # synchronizacja z serwerem
 
-rsync -a -m --exclude={'.git'} . mimuw:~/test/wierszarz
+excludes=(
+    --exclude '.git*' \
+    --exclude '*.org' \
+    --exclude '*.o' \
+    --exclude '*~' \
+    --exclude 'GPATH' \
+    --exclude 'GRTAGS' \
+    --exclude 'GTAGS')
+
+# rsync -a -m ${excludes[@]} . mimuw:~/test/wierszarz
 
 # ssh mimuw "screen -r wiersz; make -k; valgrind ./prog <lines.in"
+
+rsync -a -m --exclude-from=.tarignore . mimuw:~/test/wierszarz

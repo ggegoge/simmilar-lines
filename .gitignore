@@ -1,4 +1,10 @@
 
+# tools
+*.tar.gz
+.tarignore
+tests/
+tarruj
+
 # executables
 prog
 similar_lines

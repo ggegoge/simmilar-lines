@@ -4,6 +4,7 @@ SHELL=/bin/sh
 
 CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -pedantic -std=c99 -D_GNU_SOURCE
+LDFLAGS = 
 
 VGFLAGS = --leak-check=full --track-origins=yes
 
@@ -12,25 +13,16 @@ OBJS = main.o input.o parse.o group.o array.o
 all: similar_lines;
 
 similar_lines: $(OBJS)
-	$(CC) $(CFLAGS) -o similar_lines $(OBJS)
+	$(CC) -o $@ $^
 
 valgrind: similar_lines tests/my_ex.in
 	valgrind $(VGFLAGS) ./similar_lines <tests/my_ex.in
 
-main.o: main.c
-	$(CC) $(CFLAGS) -c main.c
-
+main.o: main.c array.h input.h parse.h group.h
 array.o: array.c array.h
-	$(CC) $(CFLAGS) -c array.c
-
-input.o: input.c input.h
-	$(CC) $(CFLAGS) -c input.c
-
-parse.o: parse.c parse.h
-	$(CC) $(CFLAGS) -c parse.c
-
-group.o: group.c group.h
-	$(CC) $(CFLAGS) -c group.c
+input.o: input.c array.h input.h parse.h
+parse.o: parse.c array.h group.h
+group.o: group.c array.h parse.h group.h
 
 clean:
 	-rm $(OBJS)

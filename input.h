@@ -6,6 +6,9 @@
 
 #include "parse.h"
 
-void read_text(PText*);
+/**
+ * Wczytanie ze standardowego wejścia i zapisanie sparsowanych wierszy
+ * w tablicy  @ptext. */
+void read_text(PText* ptext);
 
 #endif /* INPUT_H */

@@ -1,11 +1,25 @@
-#+TITLE: Wierszarz
+#+OPTIONS: toc:nil
 
+* Wierszarz
+  
 Pierwsze zadanie na IPP.
 Polecenie w pliku [[file:polecenie.org][polecenie.org]], szkopuły w [[file:dev.org][dev.org]].
 
-Na dzień 17.03 projekt można uznać za wyszedły z fazy \alpha.
+Na dzień 17.03 projekt można uznać za wyszednięty z fazy \alpha.
 
 Tj. działa.
 
 *** użycie
     Kompilacja za pomocą ~make~.
+
+*** struktura
+
+***** ~array~ - tablice dynamiczne
+
+***** ~input~ - wczytywanie
+
+***** ~parse~ - parsowanie
+
+***** ~group~ - znajdywanie grup podobnych wierszy i ich wypis
+
+***** ~main~ - wszystko w całość

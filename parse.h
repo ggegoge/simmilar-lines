@@ -10,10 +10,10 @@
 #define MAX_WORD_ASCII 126
 
 /**
- * Moduł do parse'owania linijek textu. */
+ * Moduł do parse'owania linijek tekstu. */
 
-/* składuję osobno wart abs liczby i jej wartość da by mieściło się w jednym
- * typie. */
+/* składuję osobno wart. abs. liczby i jej znak, tak by mieściło się w jednym
+ * typie wszystko */
 typedef struct whole {
   unsigned long long abs;
   enum { PLUS, MINUS } sign;
@@ -58,15 +58,14 @@ typedef struct parsed_text {
   PLine* val;
 } PText;
 
-/* inicjalizacja wartości oraz pamięci i jej zwalnianie */
-void init_ptext(PText* ptext);
-void free_text(PText);
+/* zwalnianie pamięci */
+void free_text(PText ptext);
 
 /**
  * przetworzenie pojedynczej linii @line czyli @line_num-tego wiersza. */
 PLine parseln(char* line, size_t line_num);
 
-
+/* najpiękniejsze funkcje świata */
 bool parsell(PLine*, const char*);
 bool parseull(PLine*, const char*);
 bool parsed(PLine*, const char*);

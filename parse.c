@@ -26,6 +26,7 @@ PLine parseln(char* line, size_t line_num)
     return pline;
   }
 
+  /* alokacja dopiero w momencie pewności, że dodamy tę linijkę */
   pline = init_pline(line_num);
 
   while (word) {
@@ -48,12 +49,6 @@ static PLine init_pline(size_t line_num)
   return pline;
 }
 
-void init_ptext(PText* ptext)
-{
-  ptext->len = 0;
-  ptext->used = 0;
-  ptext->val = NULL;
-}
 
 static void free_line(PLine line)
 {
@@ -74,16 +69,17 @@ void free_text(PText text)
   free(text.val);
 }
 
-
 static bool parse_whole(PLine* pline, const char* s)
 {
   Whole num;
   bool is_sign = (s[0] == '+' || s[0] == '-');
   char* err;
 
+  /* goły znak to nei liczba */
   if (is_sign && strlen(s) == 1)
     return false;
 
+  /* przyporządkowanie znaku */
   if (s[0] == '-')
     num.sign = MINUS;
   else
@@ -91,7 +87,8 @@ static bool parse_whole(PLine* pline, const char* s)
 
   errno = 0;
 
-  /* przed liczbami 8kowymi i 16kowymi nie pojawi się znak? */
+  /* przed liczbami 8kowymi i 16kowymi nie pojawi się znak? psuje to estetykę
+   * programu, prościej byłoby robić samo stroull( , , 0) */
   if (is_sign)
     num.abs = strtoull(s + 1, &err, 10);
   else
@@ -101,6 +98,7 @@ static bool parse_whole(PLine* pline, const char* s)
   if (strcmp(s, "0x") != 0 && (*err != '\0' || errno == ERANGE))
     return false;
   else {
+    /* -0, 0 i +0 zapisuję jako +0 */
     if (num.abs == 0)
       num.sign = PLUS;
 
@@ -158,6 +156,8 @@ static bool parse_real(PLine* pline, const char* s)
   return true;
 }
 
+/**
+ * Alokacja pamięci pod string @s i następnie dodanie go do plinijki @pline */
 static void new_parsed_nan(PLine* pline, const char* s)
 {
   char* new_nan = (char*) malloc(strlen(s) + 1);
@@ -175,7 +175,8 @@ static void new_parsed_nan(PLine* pline, const char* s)
   for (size_t i = 0; i < strlen(s); ++i)
     pline->nans.val[pline->nans.used - 1][i] = tolower(s[i]);
 }
-
+/**
+ * Próba sparsowania @word na 3 możliwe sposoby. */
 static void parse(PLine* pline, const char* word)
 {
   if (!(parse_whole(pline, word) || parse_real(pline, word)))
