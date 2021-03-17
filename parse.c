@@ -94,7 +94,8 @@ static bool parse_whole(PLine* pline, const char* s)
   else
     num.abs = strtoull(s, &err, 0);
 
-  if (*err != '\0' || errno == ERANGE)
+  /* "0x" to rzekomo legit liczba */
+  if (strcmp(s, "0x") != 0 && (*err != '\0' || errno == ERANGE))
     return false;
   else {
     append(&pline->wholes, sizeof(Whole), &num);
@@ -109,13 +110,15 @@ static bool parse_real(PLine* pline, const char* s)
   char* err;
 
   /* nie chcę tu łapać za dużych intów z notacji intowej, sprawdzam czy wywołany
-   * wcześniej parse_whole nie ustawił ostrzeżenia. */
-  if (errno == ERANGE)
+   * wcześniej parse_whole nie ustawił ostrzeżenia. Also: strtod nie ma opcji
+   * specyfikacji systemy liczb, zatem odrzucone hexy typu +0x... -0x...
+   * muszę ręcznie odrzucać po małpiemu. */
+  if (errno == ERANGE || s[2] == 'x')
     return false;
 
   errno = 0;
   num = strtod(s, &err);
-
+  
   /* odchodzimy odczyt się nie udał */
   if (*err != '\0' || errno == ERANGE || isnan(num))
     return false;
@@ -124,7 +127,7 @@ static bool parse_real(PLine* pline, const char* s)
   if (isfinite(num) && fabs(num) == (unsigned long long)fabs(num)) {
     if (fabs(num) <= ULLONG_MAX) {
       whole_num.abs = (unsigned long long) fabs(num);
-
+      
       if (num > 0)
         whole_num.sign = PLUS;
       else
