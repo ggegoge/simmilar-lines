@@ -29,8 +29,8 @@ typedef struct dyn_anything {
 void append(void* p, size_t width, void* new_el);
 
 /**
- *  Inicjalizacja tablicy wskazywanej przez @p o elementach wielkości @width
- *  na daną długość @len. */
+ * Inicjalizacja tablicy wskazywanej przez @p o elementach wielkości @width
+ * na daną długość @len. */
 void init(void* p, size_t width, size_t len);
   
 #endif /* ARRAY_H */
