@@ -3,7 +3,7 @@ SHELL=/bin/sh
 .PHONY: all clean valgrind
 
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -pedantic -std=c99 -D_GNU_SOURCE
+CFLAGS = -Wall -Wextra -Wpedantic -pedantic -std=c11 -D_GNU_SOURCE
 LDFLAGS = 
 
 VGFLAGS = --leak-check=full --track-origins=yes

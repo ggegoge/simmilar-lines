@@ -154,13 +154,13 @@ static int pword_cmp(const void* p1, const void* p2)
   if (pw1.class == pw2.class) {
     switch (pw1.class) {
     case WHOLE:
-      return cmp_whole(pw1.meaning.whole, pw2.meaning.whole);
+      return cmp_whole(pw1.whole, pw2.whole);
 
     case REAL:
-      return cmp_real(pw1.meaning.real, pw2.meaning.real);
+      return cmp_real(pw1.real, pw2.real);
 
     case NEITHER:
-      return strcmp(pw1.meaning.nan, pw2.meaning.nan);
+      return strcmp(pw1.nan, pw2.nan);
 
     default:
       return 0;

@@ -22,13 +22,17 @@ typedef struct whole {
 /* Liczby rzeczywiste nazywam real i trzymam je jako double'e. Nie liczby
  * nazywam nanami i trzymam je jako stringi */
 
+/**
+ * Pojedyncze sparsowane słowo. @class mówi o typie słowa, anonimowa unia to
+ * jego zawartość (odpowiednie przegródki @whole, @real, @nan).
+ * Okazuje się, że NAN jest zarezerwowane... */
 typedef struct parsed_word {
   enum { WHOLE, REAL, NEITHER } class;
   union {
     Whole whole;
     double real;
     char* nan;
-  } meaning;  
+  };  
 } PWord;
 
 struct dyn_pwords {

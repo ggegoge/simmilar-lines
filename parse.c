@@ -51,7 +51,7 @@ static void free_line(PLine line)
 {
   for (size_t i = 0; i < line.pwords.used; ++i)
     if (line.pwords.val[i].class == NEITHER)
-      free(line.pwords.val[i].meaning.nan);
+      free(line.pwords.val[i].nan);
 
   free(line.pwords.val);
 }
@@ -99,7 +99,7 @@ static bool parse_whole(PLine* pline, const char* s)
       num.sign = PLUS;
 
     pword.class = WHOLE;
-    pword.meaning.whole = num;
+    pword.whole = num;
 
     if (pline->pwords.len == 0)
       init(&pline->pwords, sizeof(PWord), SMALL_ARRAY);
@@ -141,7 +141,7 @@ static bool parse_real(PLine* pline, const char* s)
         whole_num.sign = MINUS;
 
       pword.class = WHOLE;
-      pword.meaning.whole = whole_num;
+      pword.whole = whole_num;
 
       if (pline->pwords.len == 0)
         init(&pline->pwords, sizeof(PWord), SMALL_ARRAY);
@@ -152,7 +152,7 @@ static bool parse_real(PLine* pline, const char* s)
   }
 
   pword.class = REAL;
-  pword.meaning.real = num;
+  pword.real = num;
 
   if (pline->pwords.len == 0)
     init(&pline->pwords, sizeof(PWord), SMALL_ARRAY);
@@ -174,7 +174,7 @@ static void new_parsed_nan(PLine* pline, const char* s)
 
   strcpy(new_nan, s);
   pword.class = NEITHER;
-  pword.meaning.nan = new_nan;
+  pword.nan = new_nan;
 
   if (pline->pwords.len == 0)
     init(&pline->pwords, sizeof(PWord), SMALL_ARRAY);
@@ -182,7 +182,7 @@ static void new_parsed_nan(PLine* pline, const char* s)
   append(&pline->pwords, sizeof(PWord), &pword);
 
   for (size_t i = 0; i < strlen(s); ++i)
-    pline->pwords.val[pline->pwords.used - 1].meaning.nan[i] = tolower(s[i]);
+    pline->pwords.val[pline->pwords.used - 1].nan[i] = tolower(s[i]);
 }
 /**
  * Próba sparsowania @word na 3 możliwe sposoby. */
