@@ -42,23 +42,18 @@ static PLine init_pline(size_t line_num)
   PLine pline;
   pline.line_num = line_num;
   pline.well_formed = true;
-  init(&pline.wholes, sizeof(Whole), 0);
-  init(&pline.reals, sizeof(double), 0);
-  init(&pline.nans, sizeof(char*), 0);
-
+  init(&pline.pwords, sizeof(PWord), 0);
   return pline;
 }
 
 
 static void free_line(PLine line)
 {
-  free(line.reals.val);
-  free(line.wholes.val);
+  for (size_t i = 0; i < line.pwords.used; ++i)
+    if (line.pwords.val[i].class == NEITHER)
+      free(line.pwords.val[i].meaning.nan);
 
-  for (size_t i = 0; i < line.nans.used; ++i)
-    free(line.nans.val[i]);
-
-  free(line.nans.val);
+  free(line.pwords.val);
 }
 
 void free_text(PText text)
@@ -71,6 +66,7 @@ void free_text(PText text)
 
 static bool parse_whole(PLine* pline, const char* s)
 {
+  PWord pword;
   Whole num;
   bool is_sign = (s[0] == '+' || s[0] == '-');
   char* err;
@@ -102,16 +98,20 @@ static bool parse_whole(PLine* pline, const char* s)
     if (num.abs == 0)
       num.sign = PLUS;
 
-    if (pline->wholes.len == 0)
-      init(&pline->wholes, sizeof(Whole), SMALL_ARRAY);
+    pword.class = WHOLE;
+    pword.meaning.whole = num;
 
-    append(&pline->wholes, sizeof(Whole), &num);
+    if (pline->pwords.len == 0)
+      init(&pline->pwords, sizeof(PWord), SMALL_ARRAY);
+
+    append(&pline->pwords, sizeof(PWord), &pword);
     return true;
   }
 }
 
 static bool parse_real(PLine* pline, const char* s)
 {
+  PWord pword;
   double num;
   Whole whole_num;
   char* err;
@@ -140,19 +140,25 @@ static bool parse_real(PLine* pline, const char* s)
       else
         whole_num.sign = MINUS;
 
-      if (pline->wholes.len == 0)
-        init(&pline->wholes, sizeof(Whole), SMALL_ARRAY);
+      pword.class = WHOLE;
+      pword.meaning.whole = whole_num;
 
-      append(&pline->wholes, sizeof(Whole), &whole_num);
+      if (pline->pwords.len == 0)
+        init(&pline->pwords, sizeof(PWord), SMALL_ARRAY);
+
+      append(&pline->pwords, sizeof(PWord), &pword);
       return true;
     }
   }
 
-  /* to istotnie liczba rzeczywista */
-  if (pline->reals.len == 0)
-    init(&pline->reals, sizeof(double), SMALL_ARRAY);
+  pword.class = REAL;
+  pword.meaning.real = num;
 
-  append(&pline->reals, sizeof(double), &num);
+  if (pline->pwords.len == 0)
+    init(&pline->pwords, sizeof(PWord), SMALL_ARRAY);
+
+  append(&pline->pwords, sizeof(PWord), &pword);
+
   return true;
 }
 
@@ -160,20 +166,23 @@ static bool parse_real(PLine* pline, const char* s)
  * Alokacja pamięci pod string @s i następnie dodanie go do plinijki @pline */
 static void new_parsed_nan(PLine* pline, const char* s)
 {
+  PWord pword;
   char* new_nan = (char*) malloc(strlen(s) + 1);
 
   if (!new_nan)
     exit(1);
 
   strcpy(new_nan, s);
+  pword.class = NEITHER;
+  pword.meaning.nan = new_nan;
 
-  if (pline->nans.len == 0)
-    init(&pline->nans, sizeof(char*), SMALL_ARRAY);
+  if (pline->pwords.len == 0)
+    init(&pline->pwords, sizeof(PWord), SMALL_ARRAY);
 
-  append(&pline->nans, sizeof(char*), &new_nan);
+  append(&pline->pwords, sizeof(PWord), &pword);
 
   for (size_t i = 0; i < strlen(s); ++i)
-    pline->nans.val[pline->nans.used - 1][i] = tolower(s[i]);
+    pline->pwords.val[pline->pwords.used - 1].meaning.nan[i] = tolower(s[i]);
 }
 /**
  * Próba sparsowania @word na 3 możliwe sposoby. */

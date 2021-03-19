@@ -22,21 +22,18 @@ typedef struct whole {
 /* Liczby rzeczywiste nazywam real i trzymam je jako double'e. Nie liczby
  * nazywam nanami i trzymam je jako stringi */
 
-/* dynamiczne tablice dla każdego typu i podtypu słów. bazowane na DynArr
- * z modułu array. objaśnienia pól ibidem */
-struct dyn_wholes {
-  size_t used, len;
-  Whole* val;
-};
+typedef struct parsed_word {
+  enum { WHOLE, REAL, NEITHER } class;
+  union {
+    Whole whole;
+    double real;
+    char* nan;
+  } meaning;  
+} PWord;
 
-struct dyn_reals {
+struct dyn_pwords {
   size_t used, len;
-  double* val;
-};
-
-struct dyn_nans {
-  size_t used, len;
-  char** val;
+  PWord* val;
 };
 
 /**
@@ -47,9 +44,7 @@ struct dyn_nans {
 typedef struct parsed_line {
   size_t line_num;
   bool well_formed;
-  struct dyn_wholes wholes;
-  struct dyn_reals reals;
-  struct dyn_nans nans;
+  struct dyn_pwords pwords;
 } PLine;
 
 /*  PText tj parsed text -- przechowuje PLine'y */

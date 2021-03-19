@@ -10,14 +10,13 @@
 
 /* komparatory, zadeklaruję te nudy tutaj by nie była ich implementacja
  * pierwszą widzianą rzeczą. */
-static int arrays_cmp(const void* a1, size_t len1, const void* a2, size_t len2,
-                      size_t width, int(*compare)(const void*, const void*));
 static int pline_cmp(const void*, const void*);
-static int cmp_whole(const void*, const void*);
-static int cmp_real(const void*, const void*);
-static int cmp_nan(const void*, const void*);
+static int pword_cmp(const void*, const void*);
+static int cmp_whole(Whole, Whole);
+static int cmp_real(double, double);
 static int cmp_size_t(const void*, const void*);
 static int cmp_size_t_p(const void*, const void*);
+
 
 
 /**
@@ -25,11 +24,8 @@ static int cmp_size_t_p(const void*, const void*);
  * poprzez ułożenie ichnich wielozbiorów w kolejności rosnącej. */
 static void normalise(PLine* plines, size_t len)
 {
-  for (size_t i = 0; i < len; ++i) {
-    qsort(plines[i].wholes.val, plines[i].wholes.used, sizeof(Whole), cmp_whole);
-    qsort(plines[i].reals.val, plines[i].reals.used, sizeof(double), cmp_real);
-    qsort(plines[i].nans.val, plines[i].nans.used, sizeof(char*), cmp_nan);
-  }
+  for (size_t i = 0; i < len; ++i)
+    qsort(plines[i].pwords.val, plines[i].pwords.used, sizeof(PWord), pword_cmp);
 }
 
 /**
@@ -139,45 +135,45 @@ static int pline_cmp(const void* l1, const void* l2)
   PLine pl2 = *(PLine*)l2;
   int cmp;
 
-  /* pierwsza nierówność oznacza nierówość */
-  if ((cmp = arrays_cmp(pl1.wholes.val, pl1.wholes.used, pl2.wholes.val,
-                        pl2.wholes.used, sizeof(Whole), cmp_whole)) ||
-      (cmp = arrays_cmp(pl1.reals.val, pl1.reals.used, pl2.reals.val,
-                        pl2.reals.used, sizeof(double), cmp_real)) ||
-      (cmp = arrays_cmp(pl1.nans.val, pl1.nans.used, pl2.nans.val,
-                        pl2.nans.used, sizeof(char*), cmp_nan)))
-    return cmp;
-  else
-    return 0;
-}
+  if (pl1.pwords.used != pl2.pwords.used)
+    return (pl1.pwords.used < pl2.pwords.used) ? (-1) : 1;
 
-/**
- *  Polimorficzna funkcja porównująca tablice @a1 i @a2 o długościach
- *  (odpowiednio) @len1 i @len2 oraz o polach wielkości @size. Do porównania
- *  poszczególnych pól korzysta z funkcji @compare. */
-static int arrays_cmp(const void* a1, size_t len1, const void* a2, size_t len2,
-                      size_t width, int(*compare)(const void*, const void*))
-{
-  int cmp;
-
-  if (len1 != len2)
-    return (len1 < len2) ? (-1) : 1;
-
-  for (size_t i = 0; i < len1; ++i)
-    if ((cmp = compare((char*)a1 + (i * width), (char*)a2 + (i * width))))
+  for (size_t i = 0; i < pl1.pwords.used; ++i) {
+    if ((cmp = pword_cmp(&pl1.pwords.val[i], &pl2.pwords.val[i])))
       return cmp;
+  }
 
   return 0;
+}
+
+static int pword_cmp(const void* p1, const void* p2)
+{
+  PWord pw1 = *(PWord*)p1;
+  PWord pw2 = *(PWord*)p2;
+
+  if (pw1.class == pw2.class) {
+    switch (pw1.class) {
+    case WHOLE:
+      return cmp_whole(pw1.meaning.whole, pw2.meaning.whole);
+
+    case REAL:
+      return cmp_real(pw1.meaning.real, pw2.meaning.real);
+
+    case NEITHER:
+      return strcmp(pw1.meaning.nan, pw2.meaning.nan);
+
+    default:
+      return 0;
+    }
+  } else
+    return pw1.class - pw2.class;
 }
 
 /**
  *  Funkcja porównujące dwie liczby @a i @b całkowite typu @Whole.
  *  Najpierw po znaku (- < +), później po wartości absolutnej. */
-static int cmp_whole(const void* a, const void* b)
+static int cmp_whole(Whole n1, Whole n2)
 {
-  Whole n1 = *(Whole*)a;
-  Whole n2 = *(Whole*)b;
-
   /* porównanie co do znaku i odpowiedniej wartości absolutnej.
    * test odejmowawczy odpada, ponieważ może przebić się zakres rozwalić jakoś.
    * Przeto ifologia */
@@ -197,21 +193,13 @@ static int cmp_whole(const void* a, const void* b)
     return (n1.sign == MINUS && n2.sign == PLUS) ? (-1) : 1;
 }
 
-static int cmp_real(const void* x, const void* y)
+static int cmp_real(double n1, double n2)
 {
   /* test odejmowawczy nie sprawdziłby się, albowiem inf - inf = ? */
-  double n1 = *(double*)x;
-  double n2 = *(double*)y;
-
   if (n1 != n2)
     return (n1 < n2) ? (-1) : 1;
   else
     return 0;
-}
-
-static int cmp_nan(const void* sp1, const void* sp2)
-{
-  return strcmp(*(char**)sp1, *(char**)sp2);
 }
 
 static int cmp_size_t(const void* a, const void* b)
