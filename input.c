@@ -17,19 +17,30 @@
  *  @is_eof i @is_comm to boolowskie wyznaczniki mówiące (opowiednio):
  *  czy wejście się już skończyło (eof) bądź czy ten wiersz jest komentarzem.
  */
-static void readln(char** line_ptr, size_t* len, bool* is_eof, bool* is_comm)
+static void readln(char** line_ptr, size_t* len, bool* is_eof, bool* is_comm,
+                   size_t line_num)
 {
   char c = getc(stdin);
+  ssize_t line_len;
 
   if ((*is_comm = c == '#')) {
     while (!feof(stdin) && (c = getc(stdin)) != '\n');
   }
 
   ungetc(c, stdin);
-  *is_eof = getline(line_ptr, len, stdin) == -1;
+  line_len = getline(line_ptr, len, stdin);
+  *is_eof = line_len == -1;
 
   if (!line_ptr)
     exit(1);
+
+  /* detekcja null bajtu -- wyprintowujemy tę linię jako error, a następnie
+   * dla zewnętrznego świata oznaczamy go jako komentarz by sobie odpuścił
+   * mam nadzieję, że nie wykryje mi to czegoś więcej co nie jest nullem */
+  if (!*is_eof && line_len != (ssize_t)strlen(*line_ptr)) {
+    fprintf(stderr, "ERROR %lu\n", line_num);
+    *is_comm = true;
+  }
 }
 
 void read_text(PText* ptext)
@@ -41,7 +52,7 @@ void read_text(PText* ptext)
   PLine pline;
 
   while (!feof(stdin) && !is_eof) {
-    readln(&line, &len, &is_eof, &is_comm);
+    readln(&line, &len, &is_eof, &is_comm, line_num);
 
     if (!is_comm && !is_eof) {
       pline = parseln(line, line_num);
