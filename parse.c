@@ -68,8 +68,9 @@ static bool parse_whole(PLine* pline, const char* s)
 {
   PWord pword;
   Whole num;
-  bool is_sign = (s[0] == '+' || s[0] == '-');
   char* err;
+  /* musi być znak na początku, a jednocześnie nie może być ++... lub +-... itd */
+  bool is_sign = (s[0] == '+' || s[0] == '-') && s[1] != '+' && s[1] != '-';
 
   /* goły znak to nei liczba */
   if (is_sign && strlen(s) == 1)
@@ -120,7 +121,7 @@ static bool parse_real(PLine* pline, const char* s)
    * wcześniej parse_whole nie ustawił ostrzeżenia. Also: strtod nie ma opcji
    * specyfikacji systemu liczb, zatem odrzucone hexy typu +0x... -0x...
    * muszę ręcznie odrzucać po małpiemu. */
-  if (errno == ERANGE || s[2] == 'x')
+  if (errno == ERANGE || s[1] == 'x' || s[2] == 'x')
     return false;
 
   errno = 0;
