@@ -151,24 +151,22 @@ static bool parse_real(ParsedLine* pline, const char* s)
   rounded = (unsigned long long) fabs(num);
 
   /* sprawdźmy, czy to nie jest int w przebraniu floata */
-  if (isfinite(num) && fabs(num) == rounded) {
-    if (fabs(num) <= ULLONG_MAX) {
-      whole_num.abs = rounded;
+  if (isfinite(num) && fabs(num) == rounded && fabs(num) <= ULLONG_MAX) {
+    whole_num.abs = rounded;
 
-      if (num >= 0)
-        whole_num.sign = PLUS;
-      else
-        whole_num.sign = MINUS;
+    if (num >= 0)
+      whole_num.sign = PLUS;
+    else
+      whole_num.sign = MINUS;
 
-      pword.class = WHOLE;
-      pword.whole = whole_num;
+    pword.class = WHOLE;
+    pword.whole = whole_num;
 
-      if (pline->pwords.len == 0)
-        array_init(&pline->pwords, sizeof(ParsedWord), SMALL_ARRAY);
+    if (pline->pwords.len == 0)
+      array_init(&pline->pwords, sizeof(ParsedWord), SMALL_ARRAY);
 
-      array_append(&pline->pwords, sizeof(ParsedWord), &pword);
-      return true;
-    }
+    array_append(&pline->pwords, sizeof(ParsedWord), &pword);
+    return true;
   }
 
   /* ^nie udało się wykryć liczby całkowitej, jest to więc liczba rzeczywista */
