@@ -7,10 +7,10 @@
  * Nowa długość dla tablicy w oparciu o @curr_len. */
 static inline size_t new_len(size_t curr_len)
 {
-  return (curr_len + (curr_len >> 3) + 6) & ~(size_t)3;
+  return curr_len * 2;
 }
 
-void append(void* p, size_t width, void* new_el)
+void array_append(void* p, size_t width, void* new_el)
 {
   DynArr* a = (DynArr*)p;
   ++a->used;
@@ -26,15 +26,17 @@ void append(void* p, size_t width, void* new_el)
   memcpy((char*)a->val + ((a->used - 1) * width), new_el, width);
 }
 
-void init(void* p, size_t width, size_t len)
+void array_init(void* p, size_t width, size_t len)
 {
   DynArr* a = (DynArr*)p;
   a->used = 0;
   a->len = len;
+
   if (a->len == 0) {
     a->val = NULL;
     return;
   }
+
   a->val = malloc(a->len * width);
 
   if (!a->val)

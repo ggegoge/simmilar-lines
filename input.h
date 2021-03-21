@@ -8,7 +8,7 @@
 
 /**
  * Wczytanie ze standardowego wejścia i zapisanie sparsowanych wierszy
- * w tablicy  @ptext. */
-void read_text(PText* ptext);
+ * w tablicy @ptext. */
+void read_text(ParsedText* ptext);
 
 #endif /* INPUT_H */

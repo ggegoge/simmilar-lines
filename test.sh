@@ -4,6 +4,7 @@
 function ok {
     printf "\t$1\e[1;32m ok!\e[0m\n"
 }
+
 function bad {
     all_errors[${#all_errors[@]}]=$2
     printf "\t$1\e[1;31m bad :(\e[0m\n"
@@ -19,11 +20,10 @@ function tempmk {
 }
 
 
-if [ $# -lt 2 ]
-then
+if [ $# -lt 2 ]; then
     echo test.sh: za mało argumentów.
     echo poprawne wywołanie: ./test.sh prog dir
-    exit 1;
+    exit 1
 fi
 
 prog=$1
@@ -43,20 +43,23 @@ tmpout=$(tempmk tmpout) && tmperr=$(tempmk tmperr) ||
         (echo błąd w tworzeniu pliku tymczasowego; exit 1)
 
 echo smktempowałem $tmpout i $tmperr jak coś
+echo ---------------------------------
 
 for f in $dir/*.in; do
+    
     echo sprawdzam $f
     ./$prog <$f >$tmpout 2>$tmperr
-    
-    cmp --silent ${f%in}out $tmpout &&
-        ok out ||
-            bad out ${f%in}out
-    
-    cmp --silent ${f%in}err $tmperr &&
-        ok err ||
-            bad err ${f%in}err
-    
-    >$tmpout >$tmperr
+
+    if cmp --silent ${f%in}out $tmpout; then
+        ok out
+    else
+        bad out ${f%in}out
+    fi
+    if cmp --silent ${f%in}err $tmperr; then
+        ok err
+    else
+        bad err ${f%in}err
+    fi
 done
 
 rm $tmpout $tmperr
@@ -64,9 +67,11 @@ rm $tmpout $tmperr
 # podsumiwanie
 if [ $all_errors ]; then
     echo -------------------------------
-    echo -n wszystkie błędne testy:; bad
+    echo -n wszystkie błędne testy:
+    bad
     echo -e '\t'${all_errors[*]}
 else
     echo --------------------
-    echo -n wszystkie testy; ok
+    echo -n wszystkie testy
+    ok
 fi

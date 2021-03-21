@@ -1,7 +1,3 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <math.h>
-
 #include "array.h"
 #include "input.h"
 #include "parse.h"
@@ -10,8 +6,8 @@
 
 int main(void)
 {
-  PText text;
-  init(&text, sizeof(PLine), 0);
+  ParsedText text;
+  array_init(&text, sizeof(ParsedLine), 0);
   read_text(&text);
   write_groups(text);
   free_text(text);
