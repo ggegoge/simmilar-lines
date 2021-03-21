@@ -106,7 +106,6 @@
     1. ~read_text~ reads everything from ~stdin~
     2. ~read_line~ reads single lines
 
-
 * Parse
   Parsing is in the ~parse~ module obviously. How should it be done?
 
@@ -140,3 +139,32 @@
 * Group
   I have a function that finds similars, each is normalised etc. a lot of qsorting all aroun.
 
+
+* Memory
+
+** with pythonian reallocs
+
+   #+begin_example
+     ==23086== 
+     ==23086== HEAP SUMMARY:
+     ==23086==     in use at exit: 0 bytes in 0 blocks
+     ==23086==   total heap usage: 213 allocs, 213 frees, 32,364 bytes allocated
+     ==23086== 
+     ==23086== All heap blocks were freed -- no leaks are possible
+     ==23086== 
+     ==23086== For counts of detected and suppressed errors, rerun with: -v
+     ==23086== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+   #+end_example
+   
+** with dumb reallocs
+   #+begin_example
+     ==28892== 
+     ==28892== HEAP SUMMARY:
+     ==28892==     in use at exit: 0 bytes in 0 blocks
+     ==28892==   total heap usage: 204 allocs, 204 frees, 26,156 bytes allocated
+     ==28892== 
+     ==28892== All heap blocks were freed -- no leaks are possible
+     ==28892== 
+     ==28892== For counts of detected and suppressed errors, rerun with: -v
+     ==28892== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+   #+end_example
