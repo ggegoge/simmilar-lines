@@ -17,7 +17,7 @@
  *  czy wejście się już skończyło (eof) bądź czy ten wiersz jest komentarzem.
  *  Zwraca długość obecnie wczytanej linii.
  */
-static ssize_t readln(char** line_ptr, size_t* line_size, bool* is_eof,
+static ssize_t read_line(char** line_ptr, size_t* line_size, bool* is_eof,
                       bool* is_comment)
 {
   char c = getc(stdin);
@@ -48,7 +48,7 @@ void read_text(ParsedText* ptext)
   bool is_comment = false, is_eof = false;
 
   while (!feof(stdin) && !is_eof) {
-    line_len = readln(&line, &line_size, &is_eof, &is_comment);
+    line_len = read_line(&line, &line_size, &is_eof, &is_comment);
 
     if (!is_comment && !is_eof) {
       pline = parse_line(line, line_num, (size_t) line_len);
