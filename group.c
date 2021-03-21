@@ -158,10 +158,10 @@ static int pword_cmp(const void* p1, const void* p2)
 
     case REAL:
       return cmp_real(pw1.real, pw2.real);
-
+      
     case NEITHER:
       return strcmp(pw1.nan, pw2.nan);
-
+      
     default:
       return 0;
     }

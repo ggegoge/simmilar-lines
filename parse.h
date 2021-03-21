@@ -32,7 +32,7 @@ typedef struct parsed_word {
     Whole whole;
     double real;
     char* nan;
-  };  
+  };
 } PWord;
 
 struct dyn_pwords {

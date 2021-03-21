@@ -13,11 +13,11 @@
 /**
  *  Wczytywanie z stdinu danych aż do końca linii ('\n' lub eof).
  *  @line_ptr bufor do zapisywania linijek,
- *  @len obecny rozmiar bufora,
+ *  @line_size obecny rozmiar bufora,
  *  @is_eof i @is_comm to boolowskie wyznaczniki mówiące (opowiednio):
  *  czy wejście się już skończyło (eof) bądź czy ten wiersz jest komentarzem.
  */
-static void readln(char** line_ptr, size_t* len, bool* is_eof, bool* is_comm,
+static void readln(char** line_ptr, size_t* line_size, bool* is_eof, bool* is_comm,
                    size_t line_num)
 {
   char c = getc(stdin);
@@ -25,10 +25,11 @@ static void readln(char** line_ptr, size_t* len, bool* is_eof, bool* is_comm,
 
   if ((*is_comm = c == '#')) {
     while (!feof(stdin) && (c = getc(stdin)) != '\n');
+    return;
   }
 
   ungetc(c, stdin);
-  line_len = getline(line_ptr, len, stdin);
+  line_len = getline(line_ptr, line_size, stdin);
   *is_eof = line_len == -1;
 
   if (!line_ptr)
@@ -46,13 +47,13 @@ static void readln(char** line_ptr, size_t* len, bool* is_eof, bool* is_comm,
 void read_text(PText* ptext)
 {
   size_t line_num = 1;
-  size_t len = 0;
+  size_t line_size = 0;
   char* line = NULL;
   bool is_comm = false, is_eof = false;
   PLine pline;
 
   while (!feof(stdin) && !is_eof) {
-    readln(&line, &len, &is_eof, &is_comm, line_num);
+    readln(&line, &line_size, &is_eof, &is_comm, line_num);
 
     if (!is_comm && !is_eof) {
       pline = parseln(line, line_num);
