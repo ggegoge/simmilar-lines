@@ -62,7 +62,7 @@ void free_text(PText ptext);
 
 /**
  * przetworzenie pojedynczej linii @line czyli @line_num-tego wiersza. */
-PLine parseln(char* line, size_t line_num);
+PLine parseln(char* line, size_t line_num, size_t line_len);
 
 /* najpiękniejsze funkcje świata */
 bool parsell(PLine*, const char*);

@@ -10,18 +10,18 @@
 
 static PLine init_pline(size_t);
 static void free_line(PLine);
-static bool check_line(char* s, size_t line_num);
+static bool check_line(char* s, size_t line_num, size_t line_len);
 static void parse(PLine* pline, const char* word);
 
 
-PLine parseln(char* line, size_t line_num)
+PLine parseln(char* line, size_t line_num, size_t line_len)
 {
   PLine pline;
   char* word = NULL;
   char* delims = " \t\n\v\f\r";
 
   /* sprawdzian zakresu i pustości */
-  if (!check_line(line, line_num) || !(word = strtok(line, delims))) {
+  if (!check_line(line, line_num, line_len) || !(word = strtok(line, delims))) {
     pline.well_formed = false;
     return pline;
   }
@@ -194,9 +194,9 @@ static void parse(PLine* pline, const char* word)
 }
 
 /* sprawdzian zakresu znakow */
-static bool check_line(char* s, size_t line_num)
+static bool check_line(char* s, size_t line_num, size_t line_len)
 {
-  for (size_t i = 0; i < strlen(s); ++i) {
+  for (size_t i = 0; i < line_len; ++i) {
     if (!isspace(s[i]) && (s[i] < MIN_WORD_ASCII || s[i] > MAX_WORD_ASCII)) {
       fprintf(stderr, "ERROR %lu\n", line_num);
       return false;
