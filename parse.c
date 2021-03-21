@@ -23,6 +23,7 @@ ParsedLine parse_line(char* line, size_t line_num, size_t line_len)
   /* sprawdzian zakresu, w przypadku dobrego zakresu z inicjalizacją
    * funkcji bibliotecznej strtok dzielącej na słowa względem wskazanych
    * podzielników (delims) -- brak pierwszego słowa oznacza pustość linijki. */
+  if (!check_line(&line, line_num, line_len) || !(word = strtok(line, delims))) {
     pline.well_formed = false;
     return pline;
   }
@@ -210,14 +211,19 @@ static void parse(ParsedLine* pline, const char* word)
     new_parsed_nan(pline, word);
 }
 
-/* sprawdzian zakresu znakow */
-static bool check_line(char* s, size_t line_num, size_t line_len)
+/**
+ * Sprawdzian zakresu znakow w @line_num-tej linii @s długości @line_len, a do
+ * tego lekka normalizacja -- wszystkie duże litery zostają zmienione ma małe.
+ * Zwraca informację o jej poprawności. */
+static bool check_line(char** s, size_t line_num, size_t line_len)
 {
   for (size_t i = 0; i < line_len; ++i) {
-    if (!isspace(s[i]) && (s[i] < MIN_WORD_ASCII || s[i] > MAX_WORD_ASCII)) {
+    if (!isspace((*s)[i]) && ((*s)[i] < MIN_WORD_ASCII ||
+                              (*s)[i] > MAX_WORD_ASCII)) {
       fprintf(stderr, "ERROR %lu\n", line_num);
       return false;
-    }
+    } else
+      (*s)[i] = tolower((*s)[i]);
   }
 
   return true;
