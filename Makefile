@@ -13,7 +13,7 @@ OBJS = main.o input.o parse.o group.o array.o
 all: similar_lines;
 
 similar_lines: $(OBJS)
-	$(CC) -o $@ $^
+	$(CC) $^ -o $@
 
 valgrind: similar_lines tests/my_ex.in
 	valgrind $(VGFLAGS) ./similar_lines <tests/my_ex.in
