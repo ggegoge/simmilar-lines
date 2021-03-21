@@ -168,7 +168,8 @@ static bool parse_real(PLine* pline, const char* s)
 static void new_parsed_nan(PLine* pline, const char* s)
 {
   PWord pword;
-  char* new_nan = (char*) malloc(strlen(s) + 1);
+  size_t word_len = strlen(s);
+  char* new_nan = (char*) malloc(word_len + 1);
 
   if (!new_nan)
     exit(1);
@@ -182,7 +183,7 @@ static void new_parsed_nan(PLine* pline, const char* s)
 
   append(&pline->pwords, sizeof(PWord), &pword);
 
-  for (size_t i = 0; i < strlen(s); ++i)
+  for (size_t i = 0; i < word_len; ++i)
     pline->pwords.val[pline->pwords.used - 1].nan[i] = tolower(s[i]);
 }
 /**
