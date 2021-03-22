@@ -18,10 +18,15 @@
  *  Zwraca długość obecnie wczytanej linii.
  */
 static ssize_t read_line(char** line_ptr, size_t* line_size, bool* is_eof,
-                      bool* is_comment)
+                         bool* is_comment)
 {
-  char c = getc(stdin);
   ssize_t line_len;
+  char c = getc(stdin);
+
+  if (c == EOF) {
+    *is_eof = true;
+    return -1;
+  }
 
   if ((*is_comment = c == '#')) {
     while (!feof(stdin) && (c = getc(stdin)) != '\n');
