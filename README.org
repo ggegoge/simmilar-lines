@@ -2,8 +2,11 @@
 
 * Wierszarz
   
-Pierwsze zadanie na IPP.
-Polecenie w pliku [[file:task.org][task.org]], szkopuły w [[file:dev.org][dev.org]].
+  Pierwsze zadanie na IPP.  Polecenie w pliku [[file:task.org][task.org]], szkopuły w [[file:dev.org][dev.org]].
+
+  Source kod w plikach ~*.c~ i ~*.h~. W ~tests/~ moje przyrządy do testowania. Do tego trochę
+  narzędzi moich jak [[file:sync][sync]] i [[file:tarruj][tarruj]] czyli dwa skrypciki -- jeden synchronizuje z serwerem wszystko, a
+  drugi tworzy smołę (tar.gz) Obydwa biorą pliki wymienione w zakładce *struktura*
 
 **** /Na dzień 17.03 projekt można uznać za wyszednięty z fazy \alpha./
      Tj. działa.

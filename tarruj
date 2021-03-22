@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# ułatwiacz do usmolenia
+
+tarball=wierszarz.tar.gz
+
+rm wierszarz.tar.gz 2>/dev/null
+
+COPYFILE_DISABLE=1 tar -cvz --exclude-from=.tarignore -f $tarball .

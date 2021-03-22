@@ -15,8 +15,8 @@ all: similar_lines;
 similar_lines: $(OBJS)
 	$(CC) $^ -o $@
 
-valgrind: similar_lines tests/my_ex.in
-	valgrind $(VGFLAGS) ./similar_lines <tests/my_ex.in
+valgrind: similar_lines tests/podobnawe_wiersze.in
+	valgrind $(VGFLAGS) ./similar_lines <tests/podobnawe_wiersze.in
 
 main.o: main.c array.h input.h parse.h group.h
 array.o: array.c array.h
