@@ -16,7 +16,7 @@ void array_append(void* p, size_t width, void* new_el)
   ++a->used;
 
   if (a->used >= a->len) {
-    a->len = new_len(a->len);
+    a->len = new_len(a->used);
     a->val = realloc(a->val, a->len * width);
 
     if (!a->val)
