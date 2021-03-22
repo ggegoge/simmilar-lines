@@ -129,7 +129,6 @@ static void find_similars(ParsedLine* plines, size_t len)
   free(group.val);
 }
 
-
 void write_groups(ParsedText t)
 {
   normalise(t.val, t.used);

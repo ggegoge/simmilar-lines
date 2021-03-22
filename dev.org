@@ -4,6 +4,10 @@
   - *double, który jest intem*
   
 
+  - [X] *double, który jest intem*
+  - [X] 0x == 0
+  - [ ] fully assuredd?
+
 * Links
   - [[https://stackoverflow.com/questions/8097620/how-to-read-from-input-until-newline-is-found-using-scanf][read until eol]]
   - [[https://stackoverflow.com/questions/5406935/reading-a-string-with-scanf/5407121][strings with scanf]]

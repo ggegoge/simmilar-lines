@@ -48,7 +48,6 @@ static ParsedLine init_pline(size_t line_num)
   return pline;
 }
 
-
 static void free_line(ParsedLine line)
 {
   for (size_t i = 0; i < line.pwords.used; ++i)
