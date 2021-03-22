@@ -33,7 +33,9 @@ void array_append(void* p, size_t width, void* new_el);
 
 /**
  * Inicjalizacja tablicy wskazywanej przez @p o elementach wielkości @width
- * na daną długość @len. */
+ * na daną długość @len.
+ * Jeśli @len == 0, to nie alokuje się żadnej pamięci, a jedynie inicjalizuje
+ * pola len i used dla higieny (uniknięcie valgrindzkich uninitialised... etc). */
 void array_init(void* p, size_t width, size_t len);
   
 #endif /* ARRAY_H */

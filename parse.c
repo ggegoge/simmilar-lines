@@ -75,12 +75,8 @@ static bool parse_whole(ParsedLine* pline, const char* s)
   ParsedWord pword;
   Whole num;
   char* err;
-  /* musi być znak na początku, a jednocześnie nie może być ++... lub +-... itd */
-  bool is_sign = (s[0] == '+' || s[0] == '-') && s[1] != '+' && s[1] != '-';
-
-  /* goły znak to nei liczba */
-  if (is_sign && s[1] == '\0')
-    return false;
+  /* może być znak na początku, ale po nim cyfra */
+  bool is_sign = (s[0] == '+' || s[0] == '-') && isdigit(s[1]);
 
   /* przyporządkowanie znaku */
   if (s[0] == '-')
@@ -134,10 +130,10 @@ static bool parse_real(ParsedLine* pline, const char* s)
   char* err;
 
   /* nie chcę tu łapać za dużych intów z notacji intowej, sprawdzam czy wywołany
-   * wcześniej parse_whole nie ustawił ostrzeżenia. Also: strtod nie ma opcji
-   * specyfikacji systemu liczb, zatem odrzucone hexy typu +0x... -0x...
-   * muszę ręcznie odrzucać po małpiemu (do tego brak liczb zmiennoprzeciwnkowych
-   * w notacji heksadecymalnej według forum). */
+   * wcześniej parse_whole nie ustawił ostrzeżenia. Do tego: strtod nie ma opcji
+   * specyfikacji systemu liczb, zatem hexy typu +0x... -0x... muszę ręcznie
+   * odrzucać po małpiemu (brak liczb zmiennoprzeciwnkowych w notacji
+   * heksadecymalnej według forum). */
   if (errno == ERANGE || s[1] == 'x' || s[2] == 'x')
     return false;
 
@@ -212,7 +208,7 @@ static void parse(ParsedLine* pline, const char* word)
 /**
  * Sprawdzian zakresu znakow w @line_num-tej linii @s długości @line_len, a do
  * tego lekka normalizacja -- wszystkie duże litery zostają zmienione ma małe.
- * Zwraca informację o jej poprawności. */
+ * Zwraca informację o poprawności danej linii. */
 static bool check_line(char** s, size_t line_num, size_t line_len)
 {
   for (size_t i = 0; i < line_len; ++i) {

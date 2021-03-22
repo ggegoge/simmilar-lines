@@ -141,7 +141,8 @@ void write_groups(ParsedText t)
 
 /* komparatory. Zasadniczo:
  *   cmp(a, b) = if a < b then -1 else if a > b then 1 else 0,
- * prócz porównań na zwykłych liczbach, gdzie prościej jest zwrócić różnicę.  */
+ * Porównując rzecz złożoną (np tablicę, struktury) pierwsza różnica decyduje
+ * o porządku między elementami -- quasi leksykograficznie porządkuję. */
 
 static int cmp_pline(const void* l1, const void* l2)
 {
