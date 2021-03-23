@@ -34,6 +34,10 @@ if [ ! -f "$prog" ]; then
     echo test.sh: brak takiego pliku "$prog".....
     exit 1
 fi
+if [ ! -x "$prog" ]; then
+    echo test.sh: plik "$prog" nie jest wykonywalny....
+    exit 1
+fi
 if [ ! -d "$dir" ]; then
     echo test.sh: brak takiego katalogu "$dir".....
     exit 1
