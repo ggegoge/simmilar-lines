@@ -30,15 +30,17 @@
   - [[https://stackoverflow.com/a/21097376][how does strtok work?]]
   - [[https://stackoverflow.com/q/5229343][inline across multi-file projet]]
   - [[https://github.com/python/cpython/blob/7591d9455eb37525c832da3d65e1a7b3e6dbf613/Objects/listobject.c#L61][nowa długość tablic]]
+  - [[https://stackoverflow.com/a/19246806][script detecting valgrind errors]]
 
 
 * Modules
-  Keep it simple. Module ~m~ is ~m.c~ + ~m.h~. 
+  Keep it simple. Module ~m~ is ~m.c~ { + ~m.h~ } 
 
 ** module list
 *** ~array~
 *** ~input~
 *** ~parse~
+*** ~compare~
 *** ~group~
 *** ~main~
 
@@ -53,24 +55,40 @@
       return ((size_t)curr_len + (curr_len >> 3) + 6) & ~(size_t)3;
     }
   #+end_src
-  An epic function that takes generic dynamic arrays, casts them at a general case
-
+  It is based on the [[https://github.com/python/cpython/blob/96eeff516204b7cc751103fa33dcc665e387846e/Objects/listobject.c#L61][Python's list resize mechanism]] (or rather /copied from/ not based) but in the
+  final version I suppose I'll use dumb reallocs ie. multiply the new length by 2. Perhaps I should
+  make a constant ~ARRAY_RESIZE_COEFF~ or sth like that. See more in
+  [[mem][section concerning memory usage]]
+  
   Here is the dynamic array on which all other are based:
   #+begin_src C
-    typedef struct dyn_anything {
+    typedef struct DynArr {
       size_t used, len;
       void* val;
     } DynArr;
   #+end_src
+
+  ~used~ tells you how many fields/cells of the array are filled with something. ~len~ is the actual
+  length of allocated memory. Eg:
+  
+  | 1 | 2 | 3 | 4 | ? | ? | ? | ? | ? |
+
+  would represent an array ~a~ with ~a.used = 4~ but ~a.len = 9~. This way it is resized only so
+  often because of reallocation being necessary iff ~a.used >= a.len~.
+
+  The pointer ~a.val~ points at the array itself. Here it is ~void*~ but because of that it can be
+  *anything* really. We shall go back to that later.
+  
   Here's the appending process:
+  
   #+begin_src C
-    void append(void* p, size_t width, void* new_el)
+    void array_append(void* p, size_t width, void* new_el)
     {
       DynArr* a = (DynArr*)p;
       ++a->used;
 
       if (a->used >= a->len) {
-        a->len = new_len(a->len);
+        a->len = new_len(a->used);
         a->val = realloc(a->val, a->len * width);
 
         if (!a->val)
@@ -80,6 +98,49 @@
       memcpy((char*)a->val + ((a->used - 1) * width), new_el, width);
     }
   #+end_src
+
+  Here is the initialisation
+  
+  #+begin_src C
+    void array_init(void* p, size_t width, size_t len)
+    {
+      DynArr* a = (DynArr*)p;
+      a->used = 0;
+      a->len = len;
+
+      if (a->len == 0) {
+        a->val = NULL;
+        return;
+      }
+
+      a->val = malloc(a->len * width);
+
+      if (!a->val)
+        exit(1);
+    }
+  #+end_src
+
+  Here comes the *polymorphism*. We can declare an int array:
+  
+  #+begin_src C
+    typedef struct IntArray {
+      size_t use, len;
+      int* val;
+    } IntArray;
+  #+end_src
+
+  Then we can simply initialise it and use it with our commands
+  
+  #+begin_src C
+    IntArray arr;
+
+    array_initialise(&arr, sizeof(int), 0);
+
+    for (int i = 1; i <= 4; ++i)
+      array_append(&arr, sizeof(int), &i);
+  #+end_src
+
+  which would generate the table described with the table above
 * Main
 ** the order of proceeding
    1. i create an initial array for parsed text in which I ll store all parsed lines. this i get from
@@ -87,7 +148,7 @@
    2. i call ~input~. it reads every line, calls ~parse~ on each of them and the parsed line gets added to
       the initial array for parsed text
       - I deal with the parsed line in a particular way
-   3. having all lines safely parsed in the PText, I can proceed to sorting it
+   3. having all lines safely parsed in the ParsedText, I can proceed to sorting it
    4. this is done with ~group~
    5. having al of them sorted it is easy to find the identical ones
 
@@ -95,10 +156,10 @@
 
 ** how we do it now
    I use ~getline~ and keep this memory to allocate next lines.
-   thus i have  ~readln~ and ~read_text~
+   thus i have  ~read_line~ and ~read_text~
    
    
-** +old and dumb vers+
+** +old and dumb vers which was replaced with getline+
    All the input reading shall be done in the ~input~  module. I have two types decalared there
 ****   ~struct dyn_text~ vel *DText*
      A dynamic array storing lines of *DLine* type
@@ -113,8 +174,8 @@
 * Parse
   Parsing is in the ~parse~ module obviously. How should it be done?
 
-  I take raw lines (ie. strings) and translate them into neat & tidy *PLines*
-  a *PLine* should consist of
+  I take raw lines (ie. strings) and translate them into neat & tidy *ParsedLines*
+  a *ParsedLine* should consist of
 ***** all the whole numbers
       for each I have a structure ~Whole~ which stores the number's sign and absolute value
 ***** all the reals
@@ -143,8 +204,11 @@
 * Group
   I have a function that finds similars, each is normalised etc. a lot of qsorting all aroun.
 
+* Compare
+  a ~group~ dependency -- necessary because of the qsorting which needs some order for comparisons
+  etc 
 
-* Memory
+* Memory <<mem>>
 
 ** with pythonian reallocs
 *** ~podobnawe_wiersze.in~

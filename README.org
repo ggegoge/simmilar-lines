@@ -2,17 +2,20 @@
 
 * Wierszarz
   
-  Pierwsze zadanie na IPP.  Polecenie w pliku [[file:task.org][task.org]], szkopuły w [[file:dev.org][dev.org]].
+  Pierwsze zadanie na IPP.  Polecenie w pliku [[file:task.org][task.org]], szkopuły w [[file:dev.org][dev.org]] (po angielsku bo coś mi
+  do głowy strzeliło).
 
   Source kod w plikach ~*.c~ i ~*.h~. W ~tests/~ moje przyrządy do testowania. Do tego trochę
   narzędzi moich jak [[file:sync][sync]] i [[file:tarruj][tarruj]] czyli dwa skrypciki -- jeden synchronizuje z serwerem wszystko, a
   drugi tworzy smołę (tar.gz) Obydwa biorą pliki wymienione w zakładce *struktura*
 
-**** /Na dzień 17.03 projekt można uznać za wyszednięty z fazy \alpha./
-     Tj. działa.
-**** /Na dzień 21.03.2021 projekt można uznać za wyszedły z fazy \beta/
-     Tj. działa, elegancki zapis, wszystko git /wydaje się/
-
+***** /Na dzień 17.03 projekt można uznać za wyszednięty z fazy \alpha./
+      Tj. działa.
+***** /Na dzień 21.03.2021 projekt można uznać za wyszedły z fazy \beta/
+      Tj. działa, elegancki zapis, wszystko git /wydaje się/
+***** /Na dzień 23.03.2021 projekt można uznać za wyszedły z fazy \gamma/
+      Tj. działa i uelegantniony podział na katalogi i moduły. perhaps finalna wersja, ale nzając
+      moją nerwicę natręctw to jeszcze wiele będę grzebać
 
 
 *** użycie
@@ -21,24 +24,43 @@
 *** struktura
 
 **** Pliki źródłowe
-***** ~array~ - tablice dynamiczne
-      - [[file:array.h][array.h]]
-      - [[file:array.c][array.c]]
-***** ~input~ - wczytywanie
-      - [[file:input.h][input.h]]
-      - [[file:input.c][input.c]]
-***** ~parse~ - parsowanie
-      - [[file:parse.h][parse.h]]
-      - [[file:parse.c][parse.c]]
-***** ~group~ - znajdywanie grup podobnych wierszy i ich wypis
-      - [[file:group.h][group.h]]
-      - [[file:group.c][group.c]]
-***** ~main~ - wszystko w całość
-      - [[file:main.c][main.c]]
+     Wszystkie składuję w katalogu ~src~
+***** ~array~ -- tablice dynamiczne
+      - [[file:src/array.h][array.h]]
+      - [[file:src/array.c][array.c]]
+***** ~input~ -- wczytywanie
+      - [[file:src/input.h][input.h]]
+      - [[file:src/input.c][input.c]]
+***** ~parse~ -- parsowanie
+      - [[file:src/parse.h][parse.h]]
+      - [[file:src/parse.c][parse.c]]
+***** ~group~ -- znajdywanie grup podobnych wierszy i ich wypis
+      - [[file:src/group.h][group.h]]
+      - [[file:src/group.c][group.c]]
+***** ~compare~ -- komparatory przydatne do kwik sortu w ~group~
+      - [[file:src/compare.h][compare.h]]
+      - [[file:src/compare.c][compare.c]]
+***** ~main~ -- wszystko w całość
+      - [[file:src/main.c][main.c]]
 
 **** skrypt testujący
      [[file:test.sh][test.sh]]
 
+     Użytek: ~\test.sh prog dir~ -- użyje execa ~prog~ na wszystkich plikach z ~dir/*.in~ i porówna
+     wyjście z ~dir/*.out~ oraz /wyjście diagnostyczne/ z ~dir/*.err~. Przeprowadzi też dyskretny
+     test na /czystość pamięciową/ za pomocą wałgrynda.
+
+     Jako przykłady plikow testowych mogą służyć [[file:tests/podobnawe_wiersze.in][podobnawe_wiersze.*]] 
+
 **** makefile
      [[file:Makefile][Makefile]]
-        
+     
+**** części własne do ułatwienia pisanie
+     
+***** katalog ~tests/~ z testami
+      mojego autorstwa ~podobnawe_wiersze~ oraz plik ~failloc.h~ do testów zachowania programu w
+      razie błędu krytycznego (tj. braku pamięci)
+
+***** ~sync~ i ~tarruj~
+      dwa proste shell scripty, jeden do wrzucania na students, a drugi do tworzenia pliku smoła.gz
+      z rozwiązaniem
