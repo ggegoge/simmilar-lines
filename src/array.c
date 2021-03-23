@@ -4,10 +4,10 @@
 #include "array.h"
 
 /**
- * Nowa długość dla tablicy w oparciu o @curr_len. */
-static inline size_t new_len(size_t curr_len)
+ * Nowa poszerzona długość dla tablicy (alokacja z zapasem) w oparciu o @new_len. */
+static inline size_t new_len(size_t new_len)
 {
-  return curr_len * 2;
+  return new_len * ARRAY_RESIZE;
 }
 
 void array_append(void* p, size_t width, void* new_el)
@@ -23,6 +23,7 @@ void array_append(void* p, size_t width, void* new_el)
       exit(1);
   }
 
+  /* przelewam dane spod adresu nowego elementu pod ostatni indeks */
   memcpy((char*)a->val + ((a->used - 1) * width), new_el, width);
 }
 

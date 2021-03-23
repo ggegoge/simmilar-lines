@@ -9,6 +9,9 @@
 #define MIN_WORD_ASCII 33
 #define MAX_WORD_ASCII 126
 
+/* whitespace */
+#define WHITE " \t\n\v\f\r"
+
 /**
  * Moduł do parse'owania linijek tekstu. */
 

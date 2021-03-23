@@ -21,22 +21,23 @@ static ssize_t read_line(char** line_ptr, size_t* line_size, bool* is_eof,
                          bool* is_comment)
 {
   ssize_t line_len;
+  /* za pomocą c wysonduję czy to nie jest linia komentarna */
   char c = getc(stdin);
 
   if (c == EOF) {
     *is_eof = true;
-    return -1;
+    return EOF;
   }
 
   if ((*is_comment = c == '#')) {
     while (!feof(stdin) && (c = getc(stdin)) != '\n');
 
-    return -1;
+    return EOF;
   }
 
   ungetc(c, stdin);
   line_len = getline(line_ptr, line_size, stdin);
-  *is_eof = line_len == -1;
+  *is_eof = line_len == EOF;
 
   if (!line_ptr)
     exit(1);
@@ -48,7 +49,8 @@ void read_text(ParsedText* ptext)
 {
   ParsedLine pline;
   ssize_t line_len;
-  size_t line_num = 1, line_size = 0;
+  size_t line_num = 1;
+  size_t line_size = 0;
   char* line = NULL;
   bool is_comment = false, is_eof = false;
 

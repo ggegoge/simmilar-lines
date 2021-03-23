@@ -15,6 +15,11 @@
 #define BIG_ARRAY_LENGTH 16
 
 /**
+ * Współczynnik rozrostu (tzw overalokacji) dla tablic tj przy każdym reallocu
+ * tablica zwiększa się o tyle razy. */
+#define ARRAY_RESIZE 2
+
+/**
  * "Nadklasa" dynamicznych tablic tj. wzorzec dla innych. Powinny różnić się
  * jedynie typem pola @val (tj. właściwą tablicą). Pola @used i @len to
  * odpowiednio liczba zajętych bloków tablicy @val oraz jej faktyczna długość

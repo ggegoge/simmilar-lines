@@ -18,12 +18,11 @@ ParsedLine parse_line(char* line, size_t line_num, size_t line_len)
 {
   ParsedLine pline;
   char* word = NULL;
-  char* delims = " \t\n\v\f\r";
 
   /* sprawdzian zakresu, w przypadku dobrego zakresu z inicjalizacją
    * funkcji bibliotecznej strtok dzielącej na słowa względem wskazanych
    * podzielników (delims) -- brak pierwszego słowa oznacza pustość linijki. */
-  if (!check_line(&line, line_num, line_len) || !(word = strtok(line, delims))) {
+  if (!check_line(&line, line_num, line_len) || !(word = strtok(line, WHITE))) {
     pline.well_formed = false;
     return pline;
   }
@@ -33,7 +32,7 @@ ParsedLine parse_line(char* line, size_t line_num, size_t line_len)
 
   while (word) {
     parse(&pline, word);
-    word = strtok(NULL, delims);
+    word = strtok(NULL, WHITE);
   }
 
   return pline;
