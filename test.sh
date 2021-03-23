@@ -7,7 +7,7 @@ function ok {
 
 function bad {
     if [ $# -gt 1 ]; then
-        all_errors[${#all_errors[@]}]=$2
+        all_errors[${#all_errors[@]}]="$2"
     fi
     printf "\t$1\e[1;31m bad :(\e[0m\n"
 }
@@ -28,14 +28,14 @@ if [ $# -lt 2 ]; then
     exit 1
 fi
 
-prog=$1
-dir=${2%/}
-if [ ! -f $1 ]; then
-    echo test.sh: brak takiego pliku $prog.....
+prog="$1"
+dir="${2%/}"
+if [ ! -f "$prog" ]; then
+    echo test.sh: brak takiego pliku "$prog".....
     exit 1
 fi
-if [ ! -d $dir ]; then
-    echo test.sh: brak takiego katalogu $dir.....
+if [ ! -d "$dir" ]; then
+    echo test.sh: brak takiego katalogu "$dir".....
     exit 1
 fi
 
@@ -47,26 +47,31 @@ tmpout=$(tempmk tmpout) && tmperr=$(tempmk tmperr) ||
 echo smktempowałem $tmpout i $tmperr jak coś
 echo ---------------------------------
 
-for f in $dir/*.in; do
-    
-    echo sprawdzam $f
-    ./$prog <$f >$tmpout 2>$tmperr
+for f in "$dir"/*.in; do
+    echo sprawdzam "$f"
+    "./$prog" <"$f" >$tmpout 2>$tmperr
 
-    if cmp --silent ${f%in}out $tmpout; then
+    if [ $? -eq 1 ]; then
+        printf "\t\e[0mprogram $prog zakończył się awaryjnie kodem \e[1;31m1\e[0m\n"
+        echo -e '\t'pomijam go więc w dalszych rozważaniach
+        continue
+    fi
+    
+    if cmp --silent "${f%in}out" $tmpout; then
         ok out
     else
-        bad out ${f%in}out
+        bad out "${f%in}out"
     fi
-    if cmp --silent ${f%in}err $tmperr; then
+    if cmp --silent "${f%in}err" $tmperr; then
         ok err
     else
-        bad err ${f%in}err
+        bad err "${f%in}err"
     fi
 
     # test pamięci, strasznie powolny
-    valgrind --leak-check=full --error-exitcode=123 ./$prog <$f >/dev/null 2>&1
+    valgrind --leak-check=full --error-exitcode=123 "./$prog" <"$f" >/dev/null 2>&1
     if [ $? -eq 123 ]; then
-        bad valgrind "${f%in}valgrind" 
+        bad valgrind "${f%in}valgrind"
     else
         ok valgrind
     fi
@@ -75,13 +80,13 @@ done
 rm $tmpout $tmperr
 
 # podsumiwanie
-if [ $all_errors ]; then
+if [ "$all_errors" ]; then
     echo -------------------------------
     echo err -- błędny stderr, out -- błędny stdout, valgrind -- błędy pamięci
     echo -n wszystkie błędne testy:
     bad
-    for err in ${all_errors[@]}; do
-        echo -e '\t'$err
+    for err in "${all_errors[@]}"; do
+        echo -en '\t'"$err"'\n'
     done
 else
     echo --------------------
