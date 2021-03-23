@@ -60,7 +60,7 @@ void read_text(ParsedText* ptext)
 
       if (pline.well_formed) {
         if (ptext->len == 0)
-          array_init(ptext, sizeof(ParsedLine), BIG_ARRAY);
+          array_init(ptext, sizeof(ParsedLine), BIG_ARRAY_LENGTH);
 
         array_append(ptext, sizeof(ParsedLine), &pline);
       }

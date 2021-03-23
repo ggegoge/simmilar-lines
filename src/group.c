@@ -79,8 +79,8 @@ static void find_similars(ParsedLine* plines, size_t len)
   /* Zakładam (może mylnie), że częściej zdarza się wiele grup rozczłonkowanych
    * niżli jedna wielka, zatem domyslnie przeznaczam więcej miejsca na tablicę
    * wszystkich grup niż pojedynczą grupę. */
-  array_init(&group, sizeof(size_t), SMALL_ARRAY);
-  array_init(&all_groups, sizeof(size_t**), BIG_ARRAY);
+  array_init(&group, sizeof(size_t), SMALL_ARRAY_LENGTH);
+  array_init(&all_groups, sizeof(size_t**), BIG_ARRAY_LENGTH);
 
   while (i < len) {
     curr_line = plines[i];

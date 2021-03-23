@@ -8,10 +8,11 @@
 
 /**
  * Długości tablic domyślne, te które spodziewałbym się, że mogą zająć miejsca
- * więcej inicjalizuję z @BIG_ARRAY, a te co potencjalnie będą drobniejsze
- * inicjalizuję z wykorzystaniem @SMALL_ARRAY. */
-#define SMALL_ARRAY 8
-#define BIG_ARRAY 16
+ * więcej inicjalizuję z @BIG_ARRAY_LENGTH, a te co potencjalnie będą drobniejsze
+ * inicjalizuję z wykorzystaniem @SMALL_ARRAY_LENGTH. Wybory arbitralne oparte
+ * na przewidywaniach oraz intuicji */
+#define SMALL_ARRAY_LENGTH 8
+#define BIG_ARRAY_LENGTH 16
 
 /**
  * "Nadklasa" dynamicznych tablic tj. wzorzec dla innych. Powinny różnić się

@@ -110,7 +110,7 @@ static bool parse_whole(ParsedLine* pline, const char* s)
     pword.whole = num;
 
     if (pline->pwords.len == 0)
-      array_init(&pline->pwords, sizeof(ParsedWord), SMALL_ARRAY);
+      array_init(&pline->pwords, sizeof(ParsedWord), SMALL_ARRAY_LENGTH);
 
     array_append(&pline->pwords, sizeof(ParsedWord), &pword);
     return true;
@@ -158,7 +158,7 @@ static bool parse_real(ParsedLine* pline, const char* s)
     pword.whole = whole_num;
 
     if (pline->pwords.len == 0)
-      array_init(&pline->pwords, sizeof(ParsedWord), SMALL_ARRAY);
+      array_init(&pline->pwords, sizeof(ParsedWord), SMALL_ARRAY_LENGTH);
 
     array_append(&pline->pwords, sizeof(ParsedWord), &pword);
     return true;
@@ -169,7 +169,7 @@ static bool parse_real(ParsedLine* pline, const char* s)
   pword.real = num;
 
   if (pline->pwords.len == 0)
-    array_init(&pline->pwords, sizeof(ParsedWord), SMALL_ARRAY);
+    array_init(&pline->pwords, sizeof(ParsedWord), SMALL_ARRAY_LENGTH);
 
   array_append(&pline->pwords, sizeof(ParsedWord), &pword);
   return true;
@@ -191,7 +191,7 @@ static void new_parsed_nan(ParsedLine* pline, const char* s)
   pword.nan = new_nan;
 
   if (pline->pwords.len == 0)
-    array_init(&pline->pwords, sizeof(ParsedWord), SMALL_ARRAY);
+    array_init(&pline->pwords, sizeof(ParsedWord), SMALL_ARRAY_LENGTH);
 
   array_append(&pline->pwords, sizeof(ParsedWord), &pword);
 }
