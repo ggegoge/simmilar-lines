@@ -6,7 +6,9 @@ function ok {
 }
 
 function bad {
-    all_errors[${#all_errors[@]}]=$2
+    if [ $# -gt 1 ]; then
+        all_errors[${#all_errors[@]}]=$2
+    fi
     printf "\t$1\e[1;31m bad :(\e[0m\n"
 }
 
@@ -60,6 +62,14 @@ for f in $dir/*.in; do
     else
         bad err ${f%in}err
     fi
+
+    # test pamięci, strasznie powolny
+    valgrind --leak-check=full --error-exitcode=123 ./$prog <$f >/dev/null 2>&1
+    if [ $? -eq 123 ]; then
+        bad valgrind "${f%in}valgrind" 
+    else
+        ok valgrind
+    fi
 done
 
 rm $tmpout $tmperr
@@ -67,9 +77,12 @@ rm $tmpout $tmperr
 # podsumiwanie
 if [ $all_errors ]; then
     echo -------------------------------
+    echo err -- błędny stderr, out -- błędny stdout, valgrind -- błędy pamięci
     echo -n wszystkie błędne testy:
     bad
-    echo -e '\t'${all_errors[*]}
+    for err in ${all_errors[@]}; do
+        echo -e '\t'$err
+    done
 else
     echo --------------------
     echo -n wszystkie testy
