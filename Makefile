@@ -8,8 +8,9 @@ SRC = src
 
 VGFLAGS = --leak-check=full --track-origins=yes
 
+
 OBJS = $(SRC)/main.o $(SRC)/input.o \
-       $(SRC)/parse.o $(SRC)/group.o $(SRC)/array.o
+       $(SRC)/parse.o $(SRC)/group.o $(SRC)/array.o $(SRC)/group.o
 
 .PHONY: all clean valgrind
 
@@ -25,7 +26,8 @@ main.o: main.c array.h input.h parse.h group.h
 array.o: array.c array.h
 input.o: input.c array.h input.h parse.h
 parse.o: parse.c array.h
-group.o: group.c array.h parse.h group.h
+group.o: group.c array.h parse.h compare.h group.h
+compare.o: compare.c parse.h compare.h
 
 clean:
 	-rm $(OBJS)
