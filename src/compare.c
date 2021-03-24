@@ -82,13 +82,6 @@ int cmp_real(double n1, double n2)
   return n1 != n2 ? (n1 < n2 ? -1 : 1) : 0;
 }
 
-int cmp_size_t(const void* a, const void* b)
-{
-  size_t n1 = *(size_t*)a;
-  size_t n2 = *(size_t*)b;
-  return n1 != n2 ? (n1 < n2 ? -1 : 1) : 0;
-}
-
 int cmp_size_t_p(const void* a, const void* b)
 {
   size_t n1 = **(size_t**)a;
