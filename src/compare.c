@@ -6,8 +6,11 @@
 /* komparatory. Zasadniczo:
  *   cmp(a, b) = if a < b then -1 else if a > b then 1 else 0,
  * Porównując rzecz złożoną (np tablicę, struktury) pierwsza różnica decyduje
- * o porządku między elementami -- quasi leksykograficznie porządkuję. */
+ * o porządku między elementami -- quasi leksykograficznie porządkuję.
+ * Wyjątek: cmp_pline_stable nigdy nie zwraca równości ponieważ chodzi w nim
+ * o zachowanie porządku indeksów w grupie */
 
+/* decyduje nr linii celem ustabilizowania sortowania */
 int cmp_pline(const void* l1, const void* l2)
 {
   ParsedLine pl1 = *(ParsedLine*)l1;
@@ -24,6 +27,16 @@ int cmp_pline(const void* l1, const void* l2)
   }
 
   return 0;
+}
+
+int cmp_pline_stable(const void* l1, const void* l2)
+{
+  int cmp;
+
+  if ((cmp = cmp_pline(l1, l2)))
+    return cmp;
+
+  return ((ParsedLine*)l1)->line_num < ((ParsedLine*)l2)->line_num ? -1 : 1;;
 }
 
 int cmp_pword(const void* p1, const void* p2)

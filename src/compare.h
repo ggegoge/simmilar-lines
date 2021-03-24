@@ -11,6 +11,7 @@
 
 
 int cmp_pline(const void*, const void*);
+int cmp_pline_stable(const void* l1, const void* l2);
 int cmp_pword(const void*, const void*);
 int cmp_whole(Whole, Whole);
 int cmp_real(double, double);
