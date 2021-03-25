@@ -6,9 +6,9 @@ LDFLAGS =
 
 SRC = src
 
-SOURCES = main.c input.c parse.c group.c array.c compare.c
+SRC = main.c input.c parse.c group.c array.c compare.c
 
-OBJS = $(SOURCES:%.c=$(SRC)/%.o)
+OBJS = $(SRC:%.c=src/%.o)
 
 VGFLAGS = --leak-check=full --track-origins=yes
 
@@ -22,14 +22,12 @@ similar_lines: $(OBJS)
 valgrind: similar_lines tests/podobnawe_wiersze.in
 	valgrind $(VGFLAGS) ./similar_lines <tests/podobnawe_wiersze.in
 
-$(SRC)/main.o: $(SRC)/main.c $(SRC)/array.h $(SRC)/input.h $(SRC)/parse.h \
-               $(SRC)/group.h
-$(SRC)/array.o: $(SRC)/array.c $(SRC)/array.h
-$(SRC)/input.o: $(SRC)/input.c $(SRC)/array.h $(SRC)/input.h $(SRC)/parse.h
-$(SRC)/parse.o: $(SRC)/parse.c $(SRC)/array.h
-$(SRC)/group.o: $(SRC)/group.c $(SRC)/array.h $(SRC)/parse.h \
-                $(SRC)/compare.h $(SRC)/group.h
-$(SRC)/compare.o: $(SRC)/compare.c $(SRC)/parse.h $(SRC)/compare.h
+src/main.o: src/main.c src/array.h src/input.h src/parse.h src/group.h
+src/array.o: src/array.c src/array.h
+src/input.o: src/input.c src/array.h src/input.h src/parse.h
+src/parse.o: src/parse.c src/array.h
+src/group.o: src/group.c src/array.h src/parse.h src/compare.h src/group.h
+src/compare.o: src/compare.c src/parse.h src/compare.h
 
 clean:
 	-rm $(OBJS)
