@@ -4,6 +4,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -pedantic -std=c11 -D_GNU_SOURCE
 LDFLAGS = 
 
+
 SRC = main.c input.c parse.c group.c array.c compare.c
 OBJS = $(SRC:%.c=src/%.o)
 
