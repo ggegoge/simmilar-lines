@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "array.h"
 #include "parse.h"

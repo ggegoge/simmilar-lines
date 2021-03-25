@@ -12,7 +12,7 @@ function bad {
     printf "\t$1\e[1;31m bad :(\e[0m\n"
 }
 
-# bezpieczna wersja mktemp plik działająca zarazem na linuksie jak i OSX
+# bezpieczna wersja mktemp działająca zarazem na linuksowo jak i BSDowo
 function tempmk {
     if [ $# -gt 0 ]; then
         mktemp --tmpdir "$1.XXXXXX" 2>/dev/null || mktemp -t $1
@@ -21,7 +21,7 @@ function tempmk {
     fi
 }
 
-
+# szereg sprawdzianów poprawności wywołania
 if [ $# -lt 2 ]; then
     echo test.sh: za mało argumentów.
     echo poprawne wywołanie: ./test.sh prog dir
@@ -44,7 +44,7 @@ if [ ! -d "$dir" ]; then
 fi
 
 
-# pliki na output i err
+# pliki zbiorniki na stdout i stderr
 tmpout=$(tempmk tmpout) && tmperr=$(tempmk tmperr) ||
         (echo błąd w tworzeniu pliku tymczasowego; exit 1)
 
@@ -56,7 +56,7 @@ for f in "$dir"/*.in; do
     "./$prog" <"$f" >$tmpout 2>$tmperr
 
     if [ $? -eq 1 ]; then
-        printf "\t\e[0mprogram $prog zakończył się awaryjnie kodem \e[1;31m1\e[0m\n"
+        printf "\tprogram $prog zakończył się awaryjnie kodem \e[1;31m1\e[0m\n"
         echo -e '\t'pomijam go więc w dalszych rozważaniach
         continue
     fi
@@ -73,9 +73,10 @@ for f in "$dir"/*.in; do
     fi
 
     # test pamięci, strasznie powolny
-    valgrind --leak-check=full --error-exitcode=123 "./$prog" <"$f" >/dev/null 2>&1
+    valgrind --leak-check=full --error-exitcode=123 --exit-on-first-error=yes \
+             "./$prog" <"$f" >/dev/null 2>&1
     if [ $? -eq 123 ]; then
-        bad valgrind "${f%in}valgrind"
+        bad valgrind "${f%.in} -- valgrind"
     else
         ok valgrind
     fi
@@ -86,7 +87,6 @@ rm $tmpout $tmperr
 # podsumiwanie
 if [ "$all_errors" ]; then
     echo -------------------------------
-    echo err -- błędny stderr, out -- błędny stdout, valgrind -- błędy pamięci
     echo -n wszystkie błędne testy:
     bad
     for err in "${all_errors[@]}"; do
