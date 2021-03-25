@@ -4,13 +4,11 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -pedantic -std=c11 -D_GNU_SOURCE
 LDFLAGS = 
 
-SRC = src
 
 VGFLAGS = --leak-check=full --track-origins=yes
 
-
-OBJS = $(SRC)/main.o $(SRC)/input.o  $(SRC)/parse.o $(SRC)/group.o \
-       $(SRC)/array.o $(SRC)/compare.o
+SRC = main.c input.c parse.c group.c array.c compare.c
+OBJS = $(SRC:%.c=src/%.o)
 
 .PHONY: all clean valgrind
 
@@ -22,12 +20,12 @@ similar_lines: $(OBJS)
 valgrind: similar_lines tests/podobnawe_wiersze.in
 	valgrind $(VGFLAGS) ./similar_lines <tests/podobnawe_wiersze.in
 
-main.o: main.c array.h input.h parse.h group.h
-array.o: array.c array.h
-input.o: input.c array.h input.h parse.h
-parse.o: parse.c array.h
-group.o: group.c array.h parse.h compare.h group.h
-compare.o: compare.c parse.h compare.h
+src/main.o: src/main.c src/array.h src/input.h src/parse.h src/group.h
+src/array.o: src/array.c src/array.h
+src/input.o: src/input.c src/array.h src/input.h src/parse.h
+src/parse.o: src/parse.c src/array.h
+src/group.o: src/group.c src/array.h src/parse.h src/compare.h src/group.h
+src/compare.o: src/compare.c src/parse.h src/compare.h
 
 clean:
 	-rm $(OBJS)

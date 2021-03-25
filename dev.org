@@ -6,6 +6,8 @@
 
   - [X] *double, który jest intem*
   - [X] 0x == 0
+  - [ ] should the testing script return the linum of error?
+  - [ ] get the execution time
   - [ ] fully assuredd?
 
 * Links
@@ -31,6 +33,9 @@
   - [[https://stackoverflow.com/q/5229343][inline across multi-file projet]]
   - [[https://github.com/python/cpython/blob/7591d9455eb37525c832da3d65e1a7b3e6dbf613/Objects/listobject.c#L61][nowa długość tablic]]
   - [[https://stackoverflow.com/a/19246806][script detecting valgrind errors]]
+  - [[https://superuser.com/questions/1039197/diff-stop-after-first-difference][line num cmp]]
+  - [[https://superuser.com/a/608596/1259493][time multiple commands]]
+  - [[https://stackoverflow.com/a/3795498][get only real time etc]]
 
 
 * Modules
