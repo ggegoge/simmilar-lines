@@ -24,7 +24,7 @@ static ssize_t read_line(char** line_ptr, size_t* line_size, bool* is_eof,
 {
   ssize_t line_len;
   /* za pomocą c wysonduję czy to nie jest linia komentarna */
-  char c = getc(stdin);
+  int c = getc(stdin);
 
   if (c == EOF) {
     *is_eof = true;
