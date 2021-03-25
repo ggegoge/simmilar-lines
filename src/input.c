@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <errno.h>
 #include <stdio.h>
 
 #include "array.h"
@@ -39,7 +40,7 @@ static ssize_t read_line(char** line_ptr, size_t* line_size, bool* is_eof,
   line_len = getline(line_ptr, line_size, stdin);
   *is_eof = line_len == EOF;
 
-  if (!line_ptr)
+  if (!line_ptr || errno == ENOMEM)
     exit(1);
 
   return line_len;
