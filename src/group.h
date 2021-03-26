@@ -5,7 +5,7 @@
 
 /**
  * Pojedyncza grupa podobnych wierszy, tablica dynamiczna rodem z array.h,
- * znaczenia pól @used i @len ibidem, w swoich trzewiach @val trzyma indeksy
+ * znaczenia pól @used i @len ibidem. W swoich trzewiach (@val) trzyma indeksy
  * wszystkich podobnych wierszy danej grupy. */
 typedef struct Group {
   size_t used, len;

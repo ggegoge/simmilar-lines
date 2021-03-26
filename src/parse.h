@@ -4,14 +4,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-
-/* Zakres akceptowalnych znaków ascii. */
-#define MIN_WORD_ASCII 33
-#define MAX_WORD_ASCII 126
-
-/* whitespace */
-#define WHITE " \t\n\v\f\r"
-
 /**
  * Moduł do parse'owania linijek tekstu. */
 
@@ -29,7 +21,7 @@ typedef struct Whole {
 /**
  * Pojedyncze sparsowane słowo. @class mówi o typie słowa, anonimowa unia to
  * jego zawartość (odpowiednie przegródki @whole, @real, @nan).
- * Okazuje się, że NAN jest zarezerwowane... */
+ * Okazuje się, że słowo NAN jest zarezerwowane stąd NEITHER */
 typedef struct ParsedWord {
   enum { WHOLE, REAL, NEITHER } class;
   union {
@@ -59,23 +51,18 @@ typedef struct ParsedLine {
 } ParsedLine;
 
 /**
- * ParsedText tj parsed text -- przechowuje ParsedLine'y */
+ * ParsedText -- dynamiczna tablica à la moduł array przechowuje ParsedLine'y */
 typedef struct ParsedText {
   size_t used, len;
   ParsedLine* val;
 } ParsedText;
 
-/* zwalnianie pamięci */
+/**
+ * Zwalnianie pamięci zajmowanej przez taką tablicę i jej składowe. */
 void free_text(ParsedText ptext);
 
 /**
- * przetworzenie pojedynczej linii @line czyli @line_num-tego wiersza. */
+ * Przetworzenie pojedynczej linii @line czyli @line_num-tego wiersza. */
 ParsedLine parse_line(char* line, size_t line_num, size_t line_len);
-
-/* najpiękniejsze funkcje świata */
-/* bool parsell(PLine*, const char*);
- * bool parseull(PLine*, const char*);
- * bool parsed(PLine*, const char*);
- * bool parsestr(PLine, const char*); */
 
 #endif /* PARSE_H */

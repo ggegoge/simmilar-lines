@@ -8,26 +8,29 @@
 #include "array.h"
 #include "parse.h"
 
+/* Zakres akceptowalnych znaków ascii. */
+#define MIN_WORD_ASCII 33
+#define MAX_WORD_ASCII 126
+
+#define WHITE " \t\n\v\f\r"
+
 static ParsedLine init_pline(size_t);
 static void free_line(ParsedLine);
 static bool check_line(char** s, size_t line_num, size_t line_len);
 static void parse(ParsedLine* pline, const char* word);
-
 
 ParsedLine parse_line(char* line, size_t line_num, size_t line_len)
 {
   ParsedLine pline;
   char* word = NULL;
 
-  /* sprawdzian zakresu, w przypadku dobrego zakresu z inicjalizacją
-   * funkcji bibliotecznej strtok dzielącej na słowa względem wskazanych
-   * podzielników (delims) -- brak pierwszego słowa oznacza pustość linijki. */
+  /* sprawdzian zakresu. w przypadku dobrego zakresu inicjalizacja
+   * podziału na słowa wraz ze sprawdzianem pustości danej linijki. */
   if (!check_line(&line, line_num, line_len) || !(word = strtok(line, WHITE))) {
     pline.well_formed = false;
     return pline;
   }
 
-  /* alokacja dopiero w momencie pewności, że dodamy tę linijkę */
   pline = init_pline(line_num);
 
   while (word) {
@@ -41,6 +44,7 @@ ParsedLine parse_line(char* line, size_t line_num, size_t line_len)
 static ParsedLine init_pline(size_t line_num)
 {
   ParsedLine pline;
+
   pline.line_num = line_num;
   pline.well_formed = true;
   array_init(&pline.pwords, sizeof(ParsedWord), 0);
@@ -65,18 +69,18 @@ void free_text(ParsedText text)
 }
 
 /**
- * Funkcja próbująca sparsować słowo w stringu @s i następnie dodać je do linii
- * @pline. Zwracana wartość boolowska mówi czy wczytanie zakończyło się
- * powodzeniem. */
+ * Funkcja próbująca sparsować niepuste słowo jako liczbę całkowitą typu Whole
+ * i następnie dodać je do linii. Zwracana wartość boolowska mówi, czy wczytanie
+ * zakończyło się powodzeniem. */
 static bool parse_whole(ParsedLine* pline, const char* s)
 {
   ParsedWord pword;
   Whole num;
   char* err;
-  /* może być znak na początku, ale po nim cyfra */
+  /* może być znak na początku, ale po nim cyfra. zał, że s != "", więc można
+   * bezpiecznie zajrzeć pod s[0] i s[1] (najwyżej będzie tam \0) */
   bool is_sign = (s[0] == '+' || s[0] == '-') && isdigit(s[1]);
 
-  /* przyporządkowanie znaku */
   if (s[0] == '-')
     num.sign = MINUS;
   else
@@ -84,18 +88,19 @@ static bool parse_whole(ParsedLine* pline, const char* s)
 
   errno = 0;
 
-  /* przed liczbami 8kowymi i 16kowymi nie pojawi się znak? psuje to estetykę
-   * programu, prościej byłoby robić samo stroull( , , 0) */
+  /* zgodnie z forum przed liczbami 8kowymi i 16kowymi nie pojawi się znak.
+   * psuje to estetykę programu, ale cóż, muszę więc explicite wczytać znaczone
+   * jako dziesiątkowe */
   if (is_sign)
     num.abs = strtoull(s + 1, &err, 10);
   else
     num.abs = strtoull(s, &err, 0);
 
-  /* "0x" to rzekomo legit liczba */
+  /* odrzucenie czegoś jako nieliczby(całkowitej) + corner case "0x == 0" */
   if (strcmp(s, "0x") != 0 && (*err != '\0' || errno == ERANGE)) {
-    /* liczba za duża, ale np zakończona kropką również ustawi ERANGE,
-     * ale niekoniecznie chcemy ją odrzucić w przyszłości (tj. może być ok
-     * jako liczba rzeczywista) */
+    /* liczba za duża, ale np zakończona kropką również ustawi errno == ERANGE,
+     * ale niekoniecznie jest to porządane (może to być ok l. rzeczywista),
+     * zatem resetujemy errno, aby późniejszy parse_real go nie dojrzał */
     if (errno == ERANGE && *err != '\0')
       errno = 0;
 
@@ -117,21 +122,22 @@ static bool parse_whole(ParsedLine* pline, const char* s)
 }
 
 /**
- * Funkcja dualna do parse_whole. Wczytanie liczby rzeczywistej ze stringu @s
- * i następne zapisanie jej w @pline; zwraca status udania tej operacji. */
+ * Funkcja zupełnie dualna do parse_whole, ale dopuszczalna jest sytuacja,
+ * w której w notacji liczb zmiennoprzecinkowych dostaniemy liczbę całkowitą,
+ * więc ta funkcja wyłapuje i to \RR \cap \ZZ. */
 static bool parse_real(ParsedLine* pline, const char* s)
 {
   ParsedWord pword;
   double num;
-  unsigned long long rounded;
+  unsigned long long floored;
   Whole whole_num;
   char* err;
 
   /* nie chcę tu łapać za dużych intów z notacji intowej, sprawdzam czy wywołany
    * wcześniej parse_whole nie ustawił ostrzeżenia. Do tego: strtod nie ma opcji
    * specyfikacji systemu liczb, zatem hexy typu +0x... -0x... muszę ręcznie
-   * odrzucać po małpiemu (brak liczb zmiennoprzeciwnkowych w notacji
-   * heksadecymalnej według forum). */
+   * odrzucać po małpiemu ze względ na brak liczb zmiennoprzeciwnkowych
+   * w notacji heksadecymalnej (zgodnie z wykładnią forumowską). */
   if (errno == ERANGE || s[1] == 'x' || s[2] == 'x')
     return false;
 
@@ -142,11 +148,11 @@ static bool parse_real(ParsedLine* pline, const char* s)
   if (*err != '\0' || errno == ERANGE || isnan(num))
     return false;
 
-  rounded = (unsigned long long) fabs(num);
+  /* sprawdzam, czy to nie jest int w przebraniu floata: floor(x) == x */
+  floored = (unsigned long long)fabs(num);
 
-  /* sprawdźmy, czy to nie jest int w przebraniu floata */
-  if (isfinite(num) && fabs(num) == rounded && fabs(num) <= ULLONG_MAX) {
-    whole_num.abs = rounded;
+  if (isfinite(num) && fabs(num) == floored && fabs(num) <= ULLONG_MAX) {
+    whole_num.abs = floored;
 
     if (num >= 0)
       whole_num.sign = PLUS;
@@ -175,12 +181,14 @@ static bool parse_real(ParsedLine* pline, const char* s)
 }
 
 /**
- * Alokacja pamięci pod string @s i następnie dodanie go do plinijki @pline */
+ * Alokacja pamięci pod string @s i następnie dodanie go do plinijki @pline
+ * jako nan vel NEITHER. */
 static void new_parsed_nan(ParsedLine* pline, const char* s)
 {
   ParsedWord pword;
   size_t word_len = strlen(s);
-  char* new_nan = (char*) malloc(word_len + 1);
+  /* alokacja z zapasem na \0 */
+  char* new_nan = malloc(word_len + 1);
 
   if (!new_nan)
     exit(1);
@@ -195,21 +203,21 @@ static void new_parsed_nan(ParsedLine* pline, const char* s)
   array_append(&pline->pwords, sizeof(ParsedWord), &pword);
 }
 
-/**
- * Próba sparsowania @word na 3 możliwe sposoby. */
 static void parse(ParsedLine* pline, const char* word)
 {
-  if (!(parse_whole(pline, word) || parse_real(pline, word)))
+  if (!parse_whole(pline, word) && !parse_real(pline, word))
     new_parsed_nan(pline, word);
 }
 
 /**
- * Sprawdzian zakresu znakow w @line_num-tej linii @s długości @line_len, a do
- * tego lekka normalizacja -- wszystkie duże litery zostają zmienione ma małe.
- * Zwraca informację o poprawności danej linii. */
+ * Sprawdzian zakresu znakow w @line_num-tej linii @s długości @line_len + error
+ * w przypadku nieprawidłowości, a do tego lekka normalizacja -- wszystkie duże
+ * litery z zakresu zostają zmienione ma małe. Zwraca informację o poprawności
+ * danej linii. */
 static bool check_line(char** s, size_t line_num, size_t line_len)
 {
   for (size_t i = 0; i < line_len; ++i) {
+    /* znak nieprawidłowy jest spoza zakresu i nie jest whitespace'em */
     if (!isspace((*s)[i]) && ((*s)[i] < MIN_WORD_ASCII ||
                               (*s)[i] > MAX_WORD_ASCII)) {
       fprintf(stderr, "ERROR %lu\n", line_num);

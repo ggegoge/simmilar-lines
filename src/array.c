@@ -3,8 +3,10 @@
 
 #include "array.h"
 
+#define ARRAY_RESIZE 2
+
 /**
- * Nowa poszerzona długość dla tablicy (alokacja z zapasem) w oparciu o @new_len. */
+ * Nowa poszerzona długość dla tablicy (alokacja z zapasem). */
 static inline size_t new_len(size_t new_len)
 {
   return new_len * ARRAY_RESIZE;
@@ -24,7 +26,7 @@ void array_append(void* p, size_t width, void* new_el)
   }
 
   /* przelewam dane spod adresu nowego elementu pod ostatni indeks */
-  memcpy((char*)a->val + ((a->used - 1) * width), new_el, width);
+  memcpy((char*)a->val + (a->used - 1) * width, new_el, width);
 }
 
 void array_init(void* p, size_t width, size_t len)
@@ -33,6 +35,7 @@ void array_init(void* p, size_t width, size_t len)
   a->used = 0;
   a->len = len;
 
+  /* możliwą jest alokacja pustej tablicy */
   if (a->len == 0) {
     a->val = NULL;
     return;

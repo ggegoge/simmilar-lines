@@ -21,10 +21,10 @@ valgrind: similar_lines tests/podobnawe_wiersze.in
 
 src/main.o: src/main.c src/array.h src/input.h src/parse.h src/group.h
 src/array.o: src/array.c src/array.h
-src/input.o: src/input.c src/array.h src/input.h src/parse.h
-src/parse.o: src/parse.c src/array.h
-src/group.o: src/group.c src/array.h src/parse.h src/compare.h src/group.h
-src/compare.o: src/compare.c src/parse.h src/compare.h
+src/input.o: src/input.c src/input.h src/parse.h src/array.h
+src/parse.o: src/parse.c src/parse.h src/array.h
+src/group.o: src/group.c src/group.h src/compare.h src/parse.h src/array.h
+src/compare.o: src/compare.c src/compare.h src/parse.h
 
 clean:
 	-rm $(OBJS)
