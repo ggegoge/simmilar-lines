@@ -3,6 +3,7 @@
 
 #include "array.h"
 
+/* współczynnik zwiększania się tablic dynamicznych */
 #define ARRAY_RESIZE 2
 
 /**
