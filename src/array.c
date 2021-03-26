@@ -36,7 +36,7 @@ void array_init(void* p, size_t width, size_t len)
   a->used = 0;
   a->len = len;
 
-  /* możliwą jest alokacja pustej tablicy */
+  /* inicjalizacja pustej tablicy */
   if (a->len == 0) {
     a->val = NULL;
     return;

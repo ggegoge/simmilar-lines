@@ -3,13 +3,16 @@
 
 #include <stdlib.h>
 
-/* ogólne narzędzia do wygodnego operowania na tablicach dynamicznych. */
+/**
+ * Ogólne narzędzia do wygodnego operowania na tablicach dynamicznych. */
 
 /**
  * Długości tablic domyślne, te które spodziewałbym się, że mogą zająć miejsca
  * więcej inicjalizuję z @BIG_ARRAY_LENGTH, a te co potencjalnie będą drobniejsze
  * inicjalizuję z wykorzystaniem @SMALL_ARRAY_LENGTH. Wybory arbitralne oparte
- * na przewidywaniach oraz intuicji */
+ * na przewidywaniach oraz intuicji. Np. gdy mam sytuacje typu tablica tablic
+ * (w tym programie: tekst i jego linijki) to założę zwykle, że tablica okaljąca
+ * jest tą potencjalnie większą. */
 #define SMALL_ARRAY_LENGTH 8
 #define BIG_ARRAY_LENGTH 16
 
@@ -36,7 +39,8 @@ void array_append(void* p, size_t width, void* new_el);
  * na daną długość @len.
  * Jeśli @len == 0, to nie alokuje się żadnej pamięci, a jedynie inicjalizuje
  * pola len i used dla higieny (głównie celem uniknięcia valgrindzkich
- * uninitialised... etc). */
+ * uninitialised... etc). Inicjalizacji na niezerową wartość dokonuję wtw gdy
+ * wiem, że coś pod tą zaalokowaną pamięcią będę chciał trzymać. */
 void array_init(void* p, size_t width, size_t len);
   
 #endif /* ARRAY_H */

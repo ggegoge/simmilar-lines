@@ -9,6 +9,7 @@
   - [ ] should the testing script return the linum of error?
   - [ ] get the execution time
   - [ ] fully assuredd?
+  - [X] divide the function ~find_similars~ perhpas?...
 
 * Links
   - [[https://stackoverflow.com/questions/8097620/how-to-read-from-input-until-newline-is-found-using-scanf][read until eol]]

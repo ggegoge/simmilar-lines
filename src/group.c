@@ -20,13 +20,13 @@ static void normalise(ParsedLine* plines, size_t len)
 }
 
 /**
- *  Procedura zakończenia przetwarzania obecnej @group-y i dodanie jej do tablicy
- *  wszystkich @groups */
-void end_group(Group* group, Groups* all_groups)
+ * Procedura zakończenia przetwarzania obecnej @group-y i dodanie jej do tablicy
+ * wszystkich @groups oraz następne zresetowanie jej, aby pakować tam kolejne */
+static void conclude_group(Group* group, Groups* all_groups)
 {
   /* długość tablicy indeksów musi być zwiększona o 1 ponieważ na ich końcu
-   * zapisywane zostanie 0 jako swoisty znacznik końca grupy. jest to ok ze
-   * względu na numeracje wierszy od 1 */
+   * zapisuję 0 jako swoisty znacznik końca grupy (jak \0 w stringach).
+   * jest to ok ze względu na przyjętą numeracje wierszy od 1 */
   size_t group_size = (group->used + 1) * sizeof(size_t);
   size_t* new_group = malloc(group_size);
 
@@ -43,7 +43,7 @@ void end_group(Group* group, Groups* all_groups)
 
 /**
  * Właściwe wypisanie wszystkich grup we wskazanym formacie.  */
-void print_all_groups(Groups all_groups)
+static void print_all_groups(Groups all_groups)
 {
   size_t i, j;
 
@@ -115,23 +115,21 @@ static Groups find_similars(ParsedLine* plines, size_t len)
 
   /* zakończenie ostatniej grupy */
   if (group.used != 0)
-    end_group(&group, &all_groups);
+    conclude_group(&group, &all_groups);
 
-  /* output w kolejnosci nr wierszy */
-  qsort(all_groups.val, all_groups.used, sizeof(size_t*), cmp_size_t_p);
-  print_all_groups(all_groups);
-
-  for (i = 0; i < all_groups.used; ++i)
-    free(all_groups.val[i]);
-
-  free(all_groups.val);
   free(group.val);
+  return all_groups;
 }
 
 void write_groups(ParsedText t)
 {
+  Groups all_groups;
+
+  if (t.used == 0)
+    return;
+
   normalise(t.val, t.used);
-  /* sortuję wszystkie linijki aby potem łatwo znaleźć duplikaty */
   qsort(t.val, t.used, sizeof(ParsedLine), cmp_pline_stable);
-  find_similars(t.val, t.used);
+  all_groups = find_similars(t.val, t.used);
+  conclude_grouping(all_groups);
 }

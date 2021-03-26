@@ -8,10 +8,9 @@
 #include "array.h"
 #include "parse.h"
 
-/* Zakres akceptowalnych znaków ascii. */
+/* stałe: zakres akceptowalnych znaków ascii + whitespace */
 #define MIN_WORD_ASCII 33
 #define MAX_WORD_ASCII 126
-
 #define WHITE " \t\n\v\f\r"
 
 static ParsedLine init_pline(size_t);
@@ -88,9 +87,7 @@ static bool parse_whole(ParsedLine* pline, const char* s)
 
   errno = 0;
 
-  /* zgodnie z forum przed liczbami 8kowymi i 16kowymi nie pojawi się znak.
-   * psuje to estetykę programu, ale cóż, muszę więc explicite wczytać znaczone
-   * jako dziesiątkowe */
+  /* zgodnie z forum przed liczbami 8kowymi i 16kowymi nie pojawi się znak */
   if (is_sign)
     num.abs = strtoull(s + 1, &err, 10);
   else
@@ -135,10 +132,9 @@ static bool parse_real(ParsedLine* pline, const char* s)
 
   /* nie chcę tu łapać za dużych intów z notacji intowej, sprawdzam czy wywołany
    * wcześniej parse_whole nie ustawił ostrzeżenia. Do tego: strtod nie ma opcji
-   * specyfikacji systemu liczb, zatem hexy typu +0x... -0x... muszę ręcznie
-   * odrzucać po małpiemu ze względ na brak liczb zmiennoprzeciwnkowych
-   * w notacji heksadecymalnej (zgodnie z wykładnią forumowską). */
-  if (errno == ERANGE || s[1] == 'x' || s[2] == 'x')
+   * specyfikacji systemu liczb, zatem hexy 0x... +0x... -0x... muszę ręcznie
+   * odrzucać po małpiemu (+ w ifie upewniam się co do bezpiecznosci s[2]) */
+  if (errno == ERANGE || s[1] == 'x' || (s[1] != '\0' && s[2] == 'x'))
     return false;
 
   errno = 0;

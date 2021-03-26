@@ -31,6 +31,8 @@ static ssize_t read_line(char** line_ptr, size_t* line_size, bool* is_eof,
   }
 
   if ((*is_comment = c == '#')) {
+    /* w przypadku komentarza nie chcemy ładować linii do getline'a, więc
+     * jedziemy aż do końca linii */
     while (!feof(stdin) && (c = getc(stdin)) != '\n');
 
     return EOF;
