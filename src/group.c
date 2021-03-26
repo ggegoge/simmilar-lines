@@ -28,7 +28,6 @@ void end_group(Group* group, Groups* all_groups)
    * zapisywane zostaje 0. względu na numeracje wierszy od 1 brak zerowego
    * wiersza, tym samym jest 0 dobrym wyznacznikiem końca jednej grupy w tablicy. */
   size_t group_len = (group->used + 1) * sizeof(size_t);
-  qsort(group->val, group->used, sizeof(size_t), cmp_size_t);
   new_group = (size_t*) malloc(group_len);
 
   if (!new_group)
@@ -121,6 +120,6 @@ void write_groups(ParsedText t)
 {
   normalise(t.val, t.used);
   /* sortuję wszystkie linijki aby potem łatwo znaleźć duplikaty */
-  qsort(t.val, t.used, sizeof(ParsedLine), cmp_pline);
+  qsort(t.val, t.used, sizeof(ParsedLine), cmp_pline_stable);
   find_similars(t.val, t.used);
 }
