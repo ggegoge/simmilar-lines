@@ -23,8 +23,8 @@ ParsedLine parse_line(char* line, size_t line_num, size_t line_len)
   ParsedLine pline;
   char* word = NULL;
 
-  /* sprawdzian zakresu. w przypadku dobrego zakresu inicjalizacja podziału na
-   * słowa wraz ze sprawdzianem pustości danej linijki. */
+  /* sprawdzian poprawności linii. w przypadku poprawnej inicjalizacja podziału
+   * na słowa wraz ze sprawdzianem pustości danej linijki. */
   if (!check_line(&line, line_num, line_len) || !(word = strtok(line, WHITE))) {
     pline.well_formed = false;
     return pline;
@@ -207,6 +207,14 @@ static void parse(ParsedLine* pline, const char* word)
 }
 
 /**
+ * Szybki sprawdzian poprawności znaku -- znak jest ok, jeśli jest to whitespace
+ * lub należy do odpowiedniego zakresu */
+static inline bool correct_char(char c)
+{
+  return isspace(c) || (c >= MIN_WORD_ASCII && c <= MAX_WORD_ASCII);
+}
+
+/**
  * Sprawdzian zakresu znakow w line_num-tej linii s długości line_len + error
  * w przypadku nieprawidłowości, a do tego lekka normalizacja -- wszystkie duże
  * litery z zakresu zostają zmienione ma małe. Zwraca informację o poprawności
@@ -214,9 +222,7 @@ static void parse(ParsedLine* pline, const char* word)
 static bool check_line(char** s, size_t line_num, size_t line_len)
 {
   for (size_t i = 0; i < line_len; ++i) {
-    /* znak nieprawidłowy: spoza zakresu i nie jest whitespace'em */
-    if (!isspace((*s)[i]) && ((*s)[i] < MIN_WORD_ASCII ||
-                              (*s)[i] > MAX_WORD_ASCII)) {
+    if (!correct_char((*s)[i])) {
       fprintf(stderr, "ERROR %lu\n", line_num);
       return false;
     } else
