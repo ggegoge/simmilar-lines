@@ -11,11 +11,10 @@
  * Modulik do wczytywania. */
 
 /**
- *  Wczytywanie z stdinu danych aż do końca linii ('\n' lub eof).
- *  @line_ptr bufor do zapisywania linijek,
- *  @line_size obecny rozmiar bufora,
- *  @is_eof i @is_comment to boolowskie wyznaczniki mówiące (opowiednio):
- *  czy wejście się już skończyło (eof) bądź czy ten wiersz jest komentarzem.
+ *  Wczytywanie z stdinu aż do '\n' lub eofa
+ *  line_ptr bufor do zapisywania linijek,
+ *  line_size obecny rozmiar bufora (getline wymaga tych dwu rzeczy),
+ *  is_eof i is_comment mówią o końcu linii bądź jej komentarności.
  *  Zwraca długość obecnie wczytanej linii bądź eof w razie linii pomijalnej. */
 static ssize_t read_line(char** line_ptr, size_t* line_size, bool* is_eof,
                          bool* is_comment)

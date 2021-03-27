@@ -5,10 +5,10 @@
 
 /**
  * Wierszarz, RIDMI
- * 
+ *
  * Program dzieli się na kilka kroków i zagnieżdżonych podkroków. Te główne są
  * dość dobrze wyróżnione w mainie.
- * 
+ *
  * MODUS OPERANDI:
  *   - inicjalizacja tablicy dynamicznej rodem z modułu `array' przechowującej
  *     sparsowany tekst

@@ -66,7 +66,7 @@ int cmp_pword(const void* p1, const void* p2)
 }
 
 /**
- *  Funkcja porównujące dwie liczby @a i @b całkowite typu @Whole.
+ *  Funkcja porównujące dwie liczby a i b całkowite typu Whole.
  *  Najpierw po znaku (- < +), później po wartości absolutnej (w przypadku znaku
  *  MINUS porządek się obraca). */
 int cmp_whole(Whole n1, Whole n2)

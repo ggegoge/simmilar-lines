@@ -9,7 +9,25 @@
 #include "group.h"
 
 /**
- * Normalizacja sparsowanych linijek  poprzez ułożenie ichnich wielozbiorów
+ * Pojedyncza grupa podobnych wierszy, tablica dynamiczna rodem z array.h,
+ * znaczenia pól used i len ibidem. W swoich trzewiach val trzyma indeksy
+ * wszystkich podobnych wierszy danej grupy. */
+typedef struct Group {
+  size_t used, len;
+  size_t* val;
+} Group;
+
+/**
+ * Kolejna tablica dynamiczna w wiadomym stylu. Trzyma wiele grup, każdą jako
+ * tablicę indeksów. Końce wewnętrznych tablic znakuje poprzez 0 analogicznie
+ * jak \0 w stringach. Jest to właściwe, ponieważ wiersze numerujemy od 1 */
+typedef struct Groups {
+  size_t used, len;
+  size_t** val;
+} Groups;
+
+/**
+ * Normalizacja sparsowanych linijek poprzez ułożenie ichnich wielozbiorów
  * w kolejności rosnącej tak by dwa identyczne podzbiory były reprezentowane
  * przez takie same tablice słów */
 static void normalise(ParsedLine* plines, size_t len)
@@ -20,13 +38,12 @@ static void normalise(ParsedLine* plines, size_t len)
 }
 
 /**
- * Procedura zakończenia przetwarzania obecnej @group-y i dodanie jej do tablicy
- * wszystkich @groups oraz następne zresetowanie jej, aby pakować tam kolejne */
+ * Procedura zakończenia przetwarzania obecnej grupy i dodanie jej do tablicy
+ * wszystkich groups oraz następne zresetowanie jej, aby pakować tam kolejne */
 static void conclude_group(Group* group, Groups* all_groups)
 {
   /* długość tablicy indeksów musi być zwiększona o 1 ponieważ na ich końcu
-   * zapisuję 0 jako swoisty znacznik końca grupy (jak \0 w stringach).
-   * jest to ok ze względu na przyjętą numeracje wierszy od 1 */
+   * zapisuję 0 jako swoisty znacznik końca grupy */
   size_t group_size = (group->used + 1) * sizeof(size_t);
   size_t* new_group = malloc(group_size);
 
@@ -35,7 +52,7 @@ static void conclude_group(Group* group, Groups* all_groups)
 
   /* zapisuję tam tabliczkę indeksów */
   memcpy(new_group, group->val, sizeof(size_t) * group->used);
-  /* wspomniane 0 jako sygnalizator końca tablicy liczb >0 */
+  /* wspomniane 0 jako sygnalizator końca tablicy nrów wierszy */
   new_group[group->used] = 0;
   array_append(all_groups, sizeof(size_t*), &new_group);
   group->used = 0;
@@ -48,9 +65,9 @@ static void print_all_groups(Groups all_groups)
   size_t i, j;
 
   for (i = 0; i < all_groups.used; ++i) {
-    /* pętla służy wypisaniu indeksów wszystkich podobnych wierszy jednej grupy,
-     * prócz ostatniego (koniec tablicy <-> 0), ponieważ po nim nie będzie
-     * spacji, a \n, osobno więc go printujemy */
+    /* wypisanie indeksów wszystkich podobnych wierszy jednej grupy, prócz
+     * ostatniego (0 -> koniec tablicy), ponieważ po nim nie będzie spacji,
+     * a \n, więc printujemy go osobno */
     for (j = 0; all_groups.val[i][j + 1] != 0; ++j)
       printf("%lu ", all_groups.val[i][j]);
 
@@ -59,11 +76,10 @@ static void print_all_groups(Groups all_groups)
 }
 
 /**
- * Ułożenie outputu w odpowiedniej kolejności, wypisanie na stdout oraz
- * zwolnienie pamięci */
+ * Ułożenie outputu w odpowiedniej kolejności, wypisanie i zwolnienie pamięci */
 static void conclude_grouping(Groups all_groups)
 {
-  /* output w kolejnosci nr wierszy */
+  /* sortuje po najmniejszych (pierwszych grâce à stabilność) indeksach linii */
   qsort(all_groups.val, all_groups.used, sizeof(size_t*), cmp_size_t_p);
   print_all_groups(all_groups);
 
@@ -74,9 +90,8 @@ static void conclude_grouping(Groups all_groups)
 }
 
 /**
- * Znajdywanie podobnych sparsowanych (zał.: unormalizowanych) linijek w @plines
- * (zakładając, że jest to tablica posortowana) i następne zwrócenie
- * ich w tablicy */
+ * Znajdywanie indeksów podobnych sparsowanych (zał.: unormalizowanych) linijek
+ * (w posortowanej tablicy) i następne zwrócenie ich w kolejnej tablicy */
 static Groups find_similars(ParsedLine* plines, size_t len)
 {
   Groups all_groups;
@@ -103,7 +118,7 @@ static Groups find_similars(ParsedLine* plines, size_t len)
       new_group = !new_group;
       ++i;
     } else if (cmp_pline(&curr_line, &group_line)) {
-      /* linijka różna od wzorca */
+      /* linijka różna od wzorca, kończymy obecną grupę */
       conclude_group(&group, &all_groups);
       new_group = true;
     } else {
@@ -118,6 +133,7 @@ static Groups find_similars(ParsedLine* plines, size_t len)
     conclude_group(&group, &all_groups);
 
   free(group.val);
+
   return all_groups;
 }
 

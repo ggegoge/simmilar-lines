@@ -8,8 +8,8 @@
 
 /**
  * Długości tablic domyślne, te które spodziewałbym się, że mogą zająć miejsca
- * więcej inicjalizuję z @BIG_ARRAY_LENGTH, a te co potencjalnie będą drobniejsze
- * inicjalizuję z wykorzystaniem @SMALL_ARRAY_LENGTH. Wybory arbitralne oparte
+ * więcej inicjalizuję z BIG_ARRAY_LENGTH, a te co potencjalnie będą drobniejsze
+ * inicjalizuję z wykorzystaniem SMALL_ARRAY_LENGTH. Wybory arbitralne oparte
  * na przewidywaniach oraz intuicji. Np. gdy mam sytuacje typu tablica tablic
  * (w tym programie: tekst i jego linijki) to założę zwykle, że tablica okaljąca
  * jest tą potencjalnie większą. */
@@ -18,8 +18,8 @@
 
 /**
  * "Nadklasa" dynamicznych tablic tj. wzorzec dla innych. Powinny różnić się
- * jedynie typem pola @val (tj. właściwą tablicą). Pola @used i @len to
- * odpowiednio liczba zajętych bloków tablicy @val oraz jej faktyczna długość
+ * jedynie typem pola val (tj. właściwą tablicą). Pola used i len to
+ * odpowiednio liczba zajętych bloków tablicy val oraz jej faktyczna długość
  * w pamięci (albowiem alokuję ponad stan). */
 typedef struct DynArr {
   size_t used, len;
@@ -30,14 +30,14 @@ typedef struct DynArr {
  * wyeksponowana tutaj. */
 
 /**
- * Polimorficzne dodanie elementu pod adresem @new_el do dynamicznej tablicy
- * wskazywanej przez @p, o elementach wielkości @width */
+ * Polimorficzne dodanie elementu pod adresem new_el do dynamicznej tablicy
+ * wskazywanej przez p, o elementach wielkości width */
 void array_append(void* p, size_t width, void* new_el);
 
 /**
- * Inicjalizacja tablicy wskazywanej przez @p o elementach wielkości @width
- * na daną długość @len.
- * Jeśli @len == 0, to nie alokuje się żadnej pamięci, a jedynie inicjalizuje
+ * Inicjalizacja tablicy wskazywanej przez p o elementach wielkości width
+ * na daną długość len.
+ * Jeśli len == 0, to nie alokuje się żadnej pamięci, a jedynie inicjalizuje
  * pola len i used dla higieny (głównie celem uniknięcia valgrindzkich
  * uninitialised... etc). Inicjalizacji na niezerową wartość dokonuję wtw gdy
  * wiem, że coś pod tą zaalokowaną pamięcią będę chciał trzymać. */

@@ -13,8 +13,8 @@
 #define MAX_WORD_ASCII 126
 #define WHITE " \t\n\v\f\r"
 
-static ParsedLine init_pline(size_t);
-static void free_line(ParsedLine);
+static ParsedLine init_pline(size_t line_num);
+static void free_line(ParsedLine line);
 static bool check_line(char** s, size_t line_num, size_t line_len);
 static void parse(ParsedLine* pline, const char* word);
 
@@ -23,8 +23,8 @@ ParsedLine parse_line(char* line, size_t line_num, size_t line_len)
   ParsedLine pline;
   char* word = NULL;
 
-  /* sprawdzian zakresu. w przypadku dobrego zakresu inicjalizacja
-   * podziału na słowa wraz ze sprawdzianem pustości danej linijki. */
+  /* sprawdzian zakresu. w przypadku dobrego zakresu inicjalizacja podziału na
+   * słowa wraz ze sprawdzianem pustości danej linijki. */
   if (!check_line(&line, line_num, line_len) || !(word = strtok(line, WHITE))) {
     pline.well_formed = false;
     return pline;
@@ -47,6 +47,7 @@ static ParsedLine init_pline(size_t line_num)
   pline.line_num = line_num;
   pline.well_formed = true;
   array_init(&pline.pwords, sizeof(ParsedWord), 0);
+
   return pline;
 }
 
@@ -144,7 +145,8 @@ static bool parse_real(ParsedLine* pline, const char* s)
   if (*err != '\0' || errno == ERANGE || isnan(num))
     return false;
 
-  /* sprawdzam, czy to nie jest int w przebraniu floata: floor(x) == x */
+  /* sprawdzam, czy to nie jest int w przebraniu floata: floor(x) == x
+   * i dodaję jako Whole w takim wypadku */
   floored = (unsigned long long)fabs(num);
 
   if (isfinite(num) && fabs(num) == floored && fabs(num) <= ULLONG_MAX) {
@@ -177,8 +179,7 @@ static bool parse_real(ParsedLine* pline, const char* s)
 }
 
 /**
- * Alokacja pamięci pod string @s i następnie dodanie go do plinijki @pline
- * jako nan vel NEITHER. */
+ * Alokacja pamięci pod string s i następnie dodanie go do plinijki jako nan */
 static void new_parsed_nan(ParsedLine* pline, const char* s)
 {
   ParsedWord pword;
@@ -206,14 +207,14 @@ static void parse(ParsedLine* pline, const char* word)
 }
 
 /**
- * Sprawdzian zakresu znakow w @line_num-tej linii @s długości @line_len + error
+ * Sprawdzian zakresu znakow w line_num-tej linii s długości line_len + error
  * w przypadku nieprawidłowości, a do tego lekka normalizacja -- wszystkie duże
  * litery z zakresu zostają zmienione ma małe. Zwraca informację o poprawności
  * danej linii. */
 static bool check_line(char** s, size_t line_num, size_t line_len)
 {
   for (size_t i = 0; i < line_len; ++i) {
-    /* znak nieprawidłowy jest spoza zakresu i nie jest whitespace'em */
+    /* znak nieprawidłowy: spoza zakresu i nie jest whitespace'em */
     if (!isspace((*s)[i]) && ((*s)[i] < MIN_WORD_ASCII ||
                               (*s)[i] > MAX_WORD_ASCII)) {
       fprintf(stderr, "ERROR %lu\n", line_num);

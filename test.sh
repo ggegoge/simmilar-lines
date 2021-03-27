@@ -2,20 +2,20 @@
 
 # traceback obsługi błędów/sukcesów
 function ok {
-    printf "\t$1\e[1;32m ok!\e[0m\n"
+    printf "\t%s\e[1;32m ok!\e[0m\n" "$1"
 }
 
 function bad {
     if [ $# -gt 1 ]; then
         all_errors[${#all_errors[@]}]="$2"
     fi
-    printf "\t$1\e[1;31m bad :(\e[0m\n"
+    printf "\t%s\e[1;31m bad :(\e[0m\n" "$1"
 }
 
 # bezpieczna wersja mktemp działająca zarazem na linuksowo jak i BSDowo
 function tempmk {
     if [ $# -gt 0 ]; then
-        mktemp --tmpdir "$1.XXXXXX" 2>/dev/null || mktemp -t $1
+        mktemp --tmpdir "$1.XXXXXX" 2>/dev/null || mktemp -t "$1"
     else
         mktemp --tmpdir 2>/dev/null || mktemp -t tmp
     fi
@@ -48,25 +48,25 @@ fi
 tmpout=$(tempmk tmpout) && tmperr=$(tempmk tmperr) ||
         (echo błąd w tworzeniu pliku tymczasowego; exit 1)
 
-echo smktempowałem $tmpout i $tmperr jak coś
+echo smktempowałem "$tmpout" i "$tmperr" jak coś
 echo ---------------------------------
 
 for f in "$dir"/*.in; do
     echo sprawdzam "$f"
-    "./$prog" <"$f" >$tmpout 2>$tmperr
+    "./$prog" <"$f" >"$tmpout" 2>"$tmperr"
 
     if [ $? -eq 1 ]; then
-        printf "\tprogram $prog zakończył się awaryjnie kodem \e[1;31m1\e[0m\n"
+        printf "\tprogram %s zakończył się awaryjnie kodem \e[1;31m1\e[0m\n" "$prog"
         echo -e '\t'pomijam go więc w dalszych rozważaniach
         continue
     fi
     
-    if cmp --silent "${f%in}out" $tmpout; then
+    if cmp --silent "${f%in}out" "$tmpout"; then
         ok out
     else
         bad out "${f%in}out"
     fi
-    if cmp --silent "${f%in}err" $tmperr; then
+    if cmp --silent "${f%in}err" "$tmperr"; then
         ok err
     else
         bad err "${f%in}err"
@@ -82,10 +82,10 @@ for f in "$dir"/*.in; do
     fi
 done
 
-rm $tmpout $tmperr
+rm "$tmpout" "$tmperr"
 
 # podsumiwanie
-if [ "$all_errors" ]; then
+if [ ! "${#all_errors[@]}" -eq 0 ]; then
     echo -------------------------------
     echo -n wszystkie błędne testy:
     bad

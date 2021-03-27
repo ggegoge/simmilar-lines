@@ -9,7 +9,7 @@
 
 /**
  * Typ służący reprezentacji liczb całkowitych. Składuję osobno wart. absolutną
- * liczby @abs i jej znak @sing, tak by mieściło się w jednym typie wszystko */
+ * liczby abs i jej znak sign, tak by mieściło się w jednym typie wszystko */
 typedef struct Whole {
   unsigned long long abs;
   enum { PLUS, MINUS } sign;
@@ -19,9 +19,9 @@ typedef struct Whole {
  * nazywam nanami i trzymam je jako stringi */
 
 /**
- * Pojedyncze sparsowane słowo. @class mówi o typie słowa, anonimowa unia to
- * jego zawartość (odpowiednie przegródki @whole, @real, @nan).
- * Okazuje się, że słowo NAN jest zarezerwowane stąd NEITHER */
+ * Pojedyncze sparsowane słowo. class mówi o typie słowa, anonimowa unia to
+ * jego zawartość (przegródki whole, real, nan).
+ * Okazuje się, że słowo NAN jest zarezerwowane stąd NEITHER w enumie */
 typedef struct ParsedWord {
   enum { WHOLE, REAL, NEITHER } class;
   union {
@@ -34,20 +34,20 @@ typedef struct ParsedWord {
 /**
  * Tablica na sparsowane słowa jako osobna struktura celem kompatybilności ze
  * zdefiniowanymi w array.h funkcjami. */
-struct dyn_pwords {
+struct ParsedWords {
   size_t used, len;
   ParsedWord* val;
 };
 
 /**
  * Pojedynczy przerobiony wiersz.
- * Trzyma nr linii @line_num, w @well_formed informację czy ta jest akceptowalna
- * do przetworzenia tj czy brak tam nielegalnnych znaków lub czy nie jest pusta.
- * @pwords przechowuje wszystkie sparsowane słowa z danej linijki. */
+ * Trzyma nr linii line_num, w well_formed informację czy ta jest akceptowalna
+ * do przetworzenia tj czy brak tam nielegalnych znaków i czy nie jest pusta.
+ * pwords przechowuje wszystkie sparsowane słowa z danej linijki. */
 typedef struct ParsedLine {
   size_t line_num;
   bool well_formed;
-  struct dyn_pwords pwords;
+  struct ParsedWords pwords;
 } ParsedLine;
 
 /**
@@ -62,7 +62,7 @@ typedef struct ParsedText {
 void free_text(ParsedText ptext);
 
 /**
- * Przetworzenie pojedynczej linii @line czyli @line_num-tego wiersza. */
+ * Przetworzenie pojedynczej linii line czyli line_num-tego wiersza. */
 ParsedLine parse_line(char* line, size_t line_num, size_t line_len);
 
 #endif /* PARSE_H */

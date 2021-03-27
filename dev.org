@@ -37,6 +37,14 @@
   - [[https://superuser.com/questions/1039197/diff-stop-after-first-difference][line num cmp]]
   - [[https://superuser.com/a/608596/1259493][time multiple commands]]
   - [[https://stackoverflow.com/a/3795498][get only real time etc]]
+  - others
+    - [[https://stackoverflow.com/questions/26130072/how-to-stdin-any-byte-0-255][any code char in bash]]
+    - [[https://stackoverflow.com/questions/890262/integer-ascii-value-to-character-in-bash-using-printf][ascii code bash]]
+    - [[https://stackoverflow.com/questions/9646167/clean-up-a-fork-and-restart-it-from-the-upstream][reset fork]]
+    - [[https://stackoverflow.com/questions/6022384/bash-tool-to-get-nth-line-from-a-file/6022431][sed linum]]
+    - [[https://pastebin.com/PTLeWhc2][``leave a fucking comment'']]
+  - [[https://nullprogram.com/blog/2014/08/29/][stable qsort]]
+  - [[http://citeseer.ist.psu.edu/viewdoc/download?doi=10.1.1.14.8162&rep=rep1&type=pdf][qsort as viewed by the `implementers' of qsort]]
 
 
 * Modules
