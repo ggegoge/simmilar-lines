@@ -33,13 +33,15 @@ int cmp_pline(const void* l1, const void* l2)
 int cmp_pline_stable(const void* l1, const void* l2)
 {
   int cmp;
+  size_t line_num1 = ((ParsedLine*)l1)->line_num;
+  size_t line_num2 = ((ParsedLine*)l2)->line_num;
 
   if ((cmp = cmp_pline(l1, l2)))
     return cmp;
 
   /* w przypadku równości chcemy, aby był zachowany oryginalny porządek danych
    * wyznaczany przez numery wierszy */
-  return ((ParsedLine*)l1)->line_num < ((ParsedLine*)l2)->line_num ? -1 : 1;
+  return line_num1 < line_num2 ? -1 : 1;
 }
 
 int cmp_pword(const void* p1, const void* p2)
@@ -73,16 +75,16 @@ int cmp_whole(Whole n1, Whole n2)
 {
   if (n1.sign == n2.sign) {
     if (n1.sign == MINUS)
-      return n1.abs != n2.abs ? (n1.abs < n2.abs ? 1 : -1) : 0;
+      return (n1.abs < n2.abs) - (n1.abs > n2.abs);
     else
-      return n1.abs != n2.abs ? (n1.abs < n2.abs ? -1 : 1) : 0;
+      return (n1.abs > n2.abs) - (n1.abs < n2.abs);
   } else
     return (n1.sign == MINUS && n2.sign == PLUS) ? -1 : 1;
 }
 
 int cmp_real(double n1, double n2)
 {
-  return n1 != n2 ? (n1 < n2 ? -1 : 1) : 0;
+  return (n1 > n2) - (n1 < n2);
 }
 
 int cmp_size_t_p(const void* a, const void* b)
@@ -92,5 +94,5 @@ int cmp_size_t_p(const void* a, const void* b)
   /* porównujemy pierwsze elementy tablic size_towych a i b, ponieważ moduł group
    * używa tego do posortowania wierszy outputowych podobnych grup, które
    * wewnątrz siebie są posortowane (grâce à stabilność) -> a[0] to el min a */
-  return n1 != n2 ? (n1 < n2 ? -1 : 1) : 0;
+  return (n1 > n2) - (n1 < n2);
 }
