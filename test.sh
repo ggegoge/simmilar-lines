@@ -30,6 +30,7 @@ fi
 
 prog="$1"
 dir="${2%/}"
+
 if [ ! -f "$prog" ]; then
     echo test.sh: brak takiego pliku "$prog".....
     exit 1
@@ -44,7 +45,7 @@ if [ ! -d "$dir" ]; then
 fi
 
 
-# pliki zbiorniki na stdout i stderr
+# tymczasowe pliki zbiorniki na stdout i stderr
 tmpout=$(tempmk tmpout) && tmperr=$(tempmk tmperr) ||
         (echo błąd w tworzeniu pliku tymczasowego; exit 1)
 
@@ -57,7 +58,7 @@ for f in "$dir"/*.in; do
 
     if [ $? -eq 1 ]; then
         printf "\tprogram %s zakończył się awaryjnie kodem \e[1;31m1\e[0m\n" "$prog"
-        echo -e '\t'pomijam go więc w dalszych rozważaniach
+        echo -e '\tpomijam go więc w dalszych rozważaniach'
         continue
     fi
     

@@ -20,7 +20,8 @@ typedef struct Group {
 /**
  * Kolejna tablica dynamiczna w wiadomym stylu. Trzyma wiele grup, każdą jako
  * tablicę indeksów. Końce wewnętrznych tablic znakuje poprzez 0 analogicznie
- * jak \0 w stringach. Jest to właściwe, ponieważ wiersze numerujemy od 1 */
+ * jak \0 w stringach. Jest to właściwe, ponieważ wiersze numerujemy od 1.
+ * Dzięki temu nie musimy trzymać dodatkowej liczby na wielkość. */
 typedef struct Groups {
   size_t used, len;
   size_t** val;

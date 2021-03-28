@@ -1,5 +1,7 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 #include <errno.h>
 #include <math.h>
 #include <limits.h>
@@ -23,8 +25,8 @@ ParsedLine parse_line(char* line, size_t line_num, size_t line_len)
   ParsedLine pline;
   char* word = NULL;
 
-  /* sprawdzian poprawności linii. w przypadku poprawnej inicjalizacja podziału
-   * na słowa wraz ze sprawdzianem pustości danej linijki. */
+  /* sprawdzian poprawności linii. w przypadku jej poprawności zaczynam podział
+   * na słowa wraz ze sprawdzianem (nie)pustości. */
   if (!check_line(&line, line_num, line_len) || !(word = strtok(line, WHITE))) {
     pline.well_formed = false;
     return pline;
@@ -76,6 +78,8 @@ static bool parse_whole(ParsedLine* pline, const char* s)
 {
   ParsedWord pword;
   Whole num;
+  /* err jako argument dla funkcji strto* wskazuje pierwszy niewczytany znak
+   * wczyt poprawny --> *err == '\0' */
   char* err;
   /* może być znak na początku, ale po nim cyfra. zał, że s != "", więc można
    * bezpiecznie zajrzeć pod s[0] i s[1] (najwyżej będzie tam \0) */
@@ -141,12 +145,11 @@ static bool parse_real(ParsedLine* pline, const char* s)
   errno = 0;
   num = strtod(s, &err);
 
-  /* czy poprawna rzeczywista */
   if (*err != '\0' || errno == ERANGE || isnan(num))
     return false;
 
   /* sprawdzam, czy to nie jest int w przebraniu floata: floor(x) == x
-   * i dodaję jako Whole w takim wypadku */
+   * i zapisuję tę liczbę jako Whole w takim wypadku */
   floored = (unsigned long long)fabs(num);
 
   if (isfinite(num) && fabs(num) == floored && fabs(num) <= ULLONG_MAX) {
@@ -179,7 +182,7 @@ static bool parse_real(ParsedLine* pline, const char* s)
 }
 
 /**
- * Alokacja pamięci pod string s i następnie dodanie go do plinijki jako nan */
+ * Alokacja pamięci pod string s i następne dodanie go do plinijki jako nan. */
 static void new_parsed_nan(ParsedLine* pline, const char* s)
 {
   ParsedWord pword;
@@ -215,9 +218,9 @@ static inline bool correct_char(char c)
 }
 
 /**
- * Sprawdzian zakresu znakow w line_num-tej linii s długości line_len + error
- * w przypadku nieprawidłowości, a do tego lekka normalizacja -- wszystkie duże
- * litery z zakresu zostają zmienione ma małe. Zwraca informację o poprawności
+ * Sprawdzian zakresu znakow w line_num-tej linii s długości line_len, error
+ * w przypadku nieprawidłowości. Do tego lekka normalizacja -- wszystkie duże
+ * litery (poprawne) zostają zmienione ma małe. Zwraca informację o poprawności
  * danej linii. */
 static bool check_line(char** s, size_t line_num, size_t line_len)
 {
