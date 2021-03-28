@@ -95,8 +95,13 @@ static bool parse_whole(ParsedLine* pline, const char* s)
   /* zgodnie z forum przed liczbami 8kowymi i 16kowymi nie pojawi się znak */
   if (is_sign)
     num.abs = strtoull(s + 1, &err, 10);
-  else
+  else {
     num.abs = strtoull(s, &err, 0);
+
+    /* liczba 09 przez strtoull jest traktowana jako ósemkowa (zwraca dlań 0) */
+    if (s[0] == '0' && *err != '\0')
+      num.abs = strtoull(s, &err, 10);
+  }
 
   /* odrzucenie czegoś jako nieliczby(całkowitej) + corner case "0x == 0" */
   if (strcmp(s, "0x") != 0 && (*err != '\0' || errno == ERANGE)) {
