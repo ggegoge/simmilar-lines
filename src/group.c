@@ -31,7 +31,7 @@ typedef struct Groups {
  * Normalizacja sparsowanych linijek poprzez ułożenie ichnich wielozbiorów
  * w kolejności rosnącej tak by dwa identyczne podzbiory były reprezentowane
  * przez takie same tablice słów */
-static void normalise(ParsedLine* plines, size_t len)
+static void normalise(ParsedLine plines[], size_t len)
 {
   for (size_t i = 0; i < len; ++i)
     qsort(plines[i].pwords.val, plines[i].pwords.used, sizeof(ParsedWord),
@@ -93,7 +93,7 @@ static void conclude_grouping(Groups all_groups)
 /**
  * Znajdywanie indeksów podobnych sparsowanych (zał.: unormalizowanych) linijek
  * (w posortowanej tablicy) i następne zwrócenie ich w kolejnej tablicy */
-static Groups find_similars(ParsedLine* plines, size_t len)
+static Groups find_similars(ParsedLine plines[], size_t len)
 {
   Groups all_groups;
   bool new_group = true;
