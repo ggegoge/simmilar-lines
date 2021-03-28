@@ -1,15 +1,20 @@
 #!/bin/bash
 
+# kolory terminalowe
+GREEN="\e[1;32m"
+RED="\e[1;31m"
+DEFAULT="\e[0m"
+
 # traceback obsługi błędów/sukcesów
 function ok {
-    printf "\t%s\e[1;32m ok!\e[0m\n" "$1"
+    printf "\t%s ${GREEN}ok!${DEFAULT}\n" "$1"
 }
 
 function bad {
     if [ $# -gt 1 ]; then
         all_errors[${#all_errors[@]}]="$2"
     fi
-    printf "\t%s\e[1;31m bad :(\e[0m\n" "$1"
+    printf "\t%s ${RED}bad :(${DEFAULT}\n" "$1"
 }
 
 # bezpieczna wersja mktemp działająca zarazem na linuksowo jak i BSDowo
@@ -57,7 +62,7 @@ for f in "$dir"/*.in; do
     "./$prog" <"$f" >"$tmpout" 2>"$tmperr"
 
     if [ $? -eq 1 ]; then
-        printf "\tprogram %s zakończył się awaryjnie kodem \e[1;31m1\e[0m\n" "$prog"
+        printf "\tprogram %s zakończył się awaryjnie kodem ${RED}1${DEFAULT}\n" "$prog"
         echo -e '\tpomijam go więc w dalszych rozważaniach'
         continue
     fi
@@ -75,7 +80,7 @@ for f in "$dir"/*.in; do
 
     # test pamięci, strasznie powolny
     valgrind --leak-check=full --error-exitcode=123 --exit-on-first-error=yes \
-             "./$prog" <"$f" >/dev/null 2>&1
+             --quiet "./$prog" <"$f" >/dev/null 2>&1
     if [ $? -eq 123 ]; then
         bad valgrind "${f%.in} -- valgrind"
     else
