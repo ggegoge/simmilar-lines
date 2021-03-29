@@ -12,6 +12,26 @@
  * o zachowanie porządku indeksów w grupie -- jeśli podobne są wiersze 1, 3 i 5,
  * to byłoby naszym życzeniem, aby w tej kolejności były w naszym outpucie */
 
+/**
+ * Funkcja porównujące dwie liczby a i b całkowite typu Whole.
+ * Najpierw po znaku (- < +), później po wartości absolutnej (w przypadku znaku
+ * MINUS porządek się obraca). */
+static int cmp_whole(Whole n1, Whole n2)
+{
+  if (n1.sign == n2.sign) {
+    if (n1.sign == MINUS)
+      return (n1.abs < n2.abs) - (n1.abs > n2.abs);
+    else
+      return (n1.abs > n2.abs) - (n1.abs < n2.abs);
+  } else
+    return (n1.sign == MINUS && n2.sign == PLUS) ? -1 : 1;
+}
+
+static int cmp_real(double n1, double n2)
+{
+  return (n1 > n2) - (n1 < n2);
+}
+
 int cmp_pline(const void* l1, const void* l2)
 {
   ParsedLine pl1 = *(ParsedLine*)l1;
@@ -67,32 +87,10 @@ int cmp_pword(const void* p1, const void* p2)
     return pw1.class - pw2.class;
 }
 
-/**
- *  Funkcja porównujące dwie liczby a i b całkowite typu Whole.
- *  Najpierw po znaku (- < +), później po wartości absolutnej (w przypadku znaku
- *  MINUS porządek się obraca). */
-int cmp_whole(Whole n1, Whole n2)
-{
-  if (n1.sign == n2.sign) {
-    if (n1.sign == MINUS)
-      return (n1.abs < n2.abs) - (n1.abs > n2.abs);
-    else
-      return (n1.abs > n2.abs) - (n1.abs < n2.abs);
-  } else
-    return (n1.sign == MINUS && n2.sign == PLUS) ? -1 : 1;
-}
-
-int cmp_real(double n1, double n2)
-{
-  return (n1 > n2) - (n1 < n2);
-}
-
 int cmp_size_t_p(const void* a, const void* b)
 {
   size_t n1 = **(size_t**)a;
   size_t n2 = **(size_t**)b;
-  /* porównujemy pierwsze elementy tablic size_towych a i b, ponieważ moduł group
-   * używa tego do posortowania wierszy outputowych podobnych grup, które
-   * wewnątrz siebie są posortowane (grâce à stabilność) -> a[0] to el min a */
+  /* zał., że a i b posortowane --> pierwsze elementy są najmniejsze */
   return (n1 > n2) - (n1 < n2);
 }
