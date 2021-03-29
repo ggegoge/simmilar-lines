@@ -44,10 +44,7 @@ ParsedLine parse_line(char* line, size_t line_num, size_t line_len)
 
 static ParsedLine init_pline(size_t line_num)
 {
-  ParsedLine pline;
-
-  pline.line_num = line_num;
-  pline.well_formed = true;
+  ParsedLine pline = { .well_formed = true, .line_num = line_num };
   array_init(&pline.pwords, sizeof(ParsedWord), 0);
 
   return pline;
