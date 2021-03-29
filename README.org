@@ -38,7 +38,7 @@
          - wszelkie sortowanie wymaga funkcji porządkujących z modułu *compare*
 
 ****   ZŁOŻONOŚĆ
-     Ze względu na wspomniane sortowania złożoność można szacować asymptotą od góry /O/ (/k/ log /k/),
+     Ze względu na wspomniane sortowania złożoność można szacować asymptotą od góry /O/(/k/ log /k/),
      gdzie /k/ to liczba znaków na wejściu.
 
        ---------------------   
