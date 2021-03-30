@@ -45,6 +45,9 @@
     - [[https://pastebin.com/PTLeWhc2][``leave a fucking comment'']]
   - [[https://nullprogram.com/blog/2014/08/29/][stable qsort]]
   - [[http://citeseer.ist.psu.edu/viewdoc/download?doi=10.1.1.14.8162&rep=rep1&type=pdf][qsort as viewed by the `implementers' of qsort]]
+  - [[https://stackoverflow.com/questions/3915040/how-to-obtain-the-absolute-path-of-a-file-via-shell-bash-zsh-sh][real path]]
+  - [[https://stackoverflow.com/questions/2564634/convert-absolute-path-into-relative-path-given-a-current-directory-using-bash][rel path]]
+  - [[https://linuxhint.com/bash_append_array/][bash array append]]
 
 
 * Modules
