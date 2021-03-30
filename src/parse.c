@@ -10,12 +10,14 @@
 #include "array.h"
 #include "parse.h"
 
-/* stałe: zakres akceptowalnych znaków ascii, whitespace oraz znaczniki kluczowe
- * dla systemów liczbowych będących przedmiotem naszych rozważań*/
+/* zakres akceptowalnych znaków ascii w słowie */
 #define MIN_WORD_ASCII 33
 #define MAX_WORD_ASCII 126
+
+/* whitespace */
 #define WHITE " \t\n\v\f\r"
 
+/* znacznik ósemkowości i szesnastkowości */
 #define OCT_MARKER '0'
 #define HEX_MARKER 'x'
 

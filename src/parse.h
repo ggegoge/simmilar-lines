@@ -32,8 +32,8 @@ typedef struct ParsedWord {
 } ParsedWord;
 
 /**
- * Tablica na sparsowane słowa jako osobna struktura celem kompatybilności ze
- * zdefiniowanymi w array.h funkcjami. */
+ * Tablica na sparsowane słowa jako osobna struktura celem zachowanie
+ * kompatybilności ze zdefiniowanymi w module array funkcjami. */
 struct ParsedWords {
   size_t used, len;
   ParsedWord* val;
