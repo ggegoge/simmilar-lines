@@ -5,6 +5,9 @@ GREEN="\e[1;32m"
 RED="\e[1;31m"
 DEFAULT="\e[0m"
 
+# tablica na błędy
+all_errors=()
+
 # traceback obsługi błędów/sukcesów
 function ok {
     printf "\t%s ${GREEN}ok!${DEFAULT}\n" "$1"
@@ -17,7 +20,7 @@ function bad {
     printf "\t%s ${RED}bad :(${DEFAULT}\n" "$1"
 }
 
-# bezpieczna wersja mktemp działająca zarazem na linuksowo jak i BSDowo
+# bezpieczna wersja mktemp działająca zarazem linuksowo jak i BSDowo
 function tempmk {
     if [ $# -gt 0 ]; then
         mktemp --tmpdir "$1.XXXXXX" 2>/dev/null || mktemp -t "$1"
@@ -33,7 +36,9 @@ if [ $# -lt 2 ]; then
     exit 1
 fi
 
-# execa zapisuję wersje z prawdziwymi ścieżkami aby każda działała
+# execa zapisuję wersje z prawdziwymi ścieżkami, aby każda działała (naiwne
+# podejście typu "./prog" wywaliłoby się, gdyby ktoś dał ścieżkę absolutną,
+# a nie względną)
 prog="$1"
 real_prog=$(realpath "$prog")
 

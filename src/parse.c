@@ -80,7 +80,7 @@ static bool parse_whole(ParsedLine* pline, const char* s)
   char* err;
   /* może być znak na początku, ale po nim cyfra. zał, że s != "", więc można
    * bezpiecznie zajrzeć pod s[0] i s[1] (najwyżej będzie tam \0) */
-  bool is_sign = (s[0] == '+' || s[0] == '-') && isdigit(s[1]);
+  bool has_sign = (s[0] == '+' || s[0] == '-') && isdigit(s[1]);
 
   if (s[0] == '-')
     num.sign = MINUS;
@@ -90,7 +90,7 @@ static bool parse_whole(ParsedLine* pline, const char* s)
   errno = 0;
 
   /* zgodnie z forum przed liczbami 8kowymi i 16kowymi nie pojawi się znak */
-  if (is_sign)
+  if (has_sign)
     num.abs = strtoull(s + 1, &err, 10);
   else {
     num.abs = strtoull(s, &err, 0);

@@ -5,11 +5,11 @@
 
 /**
  * Wierszarz, Grzegorz Cichosz, marzec 2021
- * 
+ *
  * RIDMI
  *  Program dzieli się na kilka kroków i zagnieżdżonych podkroków. Te główne są
  *  dość dobrze wyróżnione w mainie.
- * 
+ *
  * MODUS OPERANDI
  *   - inicjalizacja tablicy dynamicznej rodem z modułu `array' przechowującej
  *     sparsowany tekst
@@ -24,7 +24,7 @@
  *     + następnie sortowanie wszystkich linii po tychże tablicach
  *       wewnętrznych, aby z tej postaci wyłuskać duplikaty (tj podobne wiersze)
  *       - wszelkie sortowanie wymaga funkcji porządkujących z modułu `compare'
- * 
+ *
  * ZŁOŻONOŚĆ
  *  Ze względu na wspomniane sortowania złożoność można szacować asymptotą od
  *  góry O(k log k), gdzie k to liczba znaków na wejściu.
