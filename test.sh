@@ -12,7 +12,7 @@ function ok {
 
 function bad {
     if [ $# -gt 1 ]; then
-        all_errors[${#all_errors[@]}]="$2"
+        all_errors+=("$2")
     fi
     printf "\t%s ${RED}bad :(${DEFAULT}\n" "$1"
 }
@@ -33,7 +33,10 @@ if [ $# -lt 2 ]; then
     exit 1
 fi
 
+# execa zapisuję wersje z prawdziwymi ścieżkami aby każda działała
 prog="$1"
+real_prog=$(realpath "$prog")
+
 dir="${2%/}"
 
 if [ ! -f "$prog" ]; then
@@ -59,10 +62,11 @@ echo ---------------------------------
 
 for f in "$dir"/*.in; do
     echo sprawdzam "$f"
-    "./$prog" <"$f" >"$tmpout" 2>"$tmperr"
+    "$real_prog" <"$f" >"$tmpout" 2>"$tmperr"
 
     if [ $? -eq 1 ]; then
-        printf "\tprogram %s zakończył się awaryjnie kodem ${RED}1${DEFAULT}\n" "$prog"
+        printf "\tprogram %s zakończył się awaryjnie kodem ${RED}1${DEFAULT}\n"\
+               "$prog"
         echo -e '\tpomijam go więc w dalszych rozważaniach'
         continue
     fi
@@ -78,9 +82,11 @@ for f in "$dir"/*.in; do
         bad err "${f%in}err"
     fi
 
-    # test pamięci, strasznie powolny
+    # test pamięci, strasznie powolny. ustawi exit code na 123 w razie błędu
     valgrind --leak-check=full --error-exitcode=123 --exit-on-first-error=yes \
-             --quiet "./$prog" <"$f" >/dev/null 2>&1
+             --errors-for-leak-kinds=all --quiet \
+             "$real_prog" <"$f" >/dev/null 2>&1
+    
     if [ $? -eq 123 ]; then
         bad valgrind "${f%.in} -- valgrind"
     else
@@ -90,13 +96,13 @@ done
 
 rm "$tmpout" "$tmperr"
 
-# podsumiwanie
+# podsumowanief
 if [ ! "${#all_errors[@]}" -eq 0 ]; then
     echo -------------------------------
     echo -n wszystkie błędne testy:
     bad
     for err in "${all_errors[@]}"; do
-        echo -en '\t'"$err"'\n'
+        printf "\t%s\n" "${err}"
     done
 else
     echo --------------------
