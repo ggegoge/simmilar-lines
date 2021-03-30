@@ -155,7 +155,9 @@ static bool parse_real(ParsedLine* pline, const char* s)
   errno = 0;
   num = strtod(s, &err);
 
-  if (*err != '\0' || errno == ERANGE || isnan(num))
+  /* odrzucam liczby niewczytane, spoza zakresu, nany + INFINITY != inf */
+  if (*err != '\0' || errno == ERANGE || isnan(num) ||
+      (!isfinite(num) && s[strlen(s) - 1] != 'f'))
     return false;
 
   /* sprawdzam, czy to nie jest int w przebraniu floata: floor(x) == x
