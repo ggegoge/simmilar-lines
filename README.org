@@ -2,7 +2,9 @@
 
 * Wierszarz
   
-  Pierwsze zadanie na IPP.  Polecenie w pliku [[file:task.org][task.org]], szkopuły w [[file:dev.org][dev.org]] (po angielsku bo coś mi
+  Małe zadanie z *IPP 2021* na MIMuwku.
+  
+  Polecenie w pliku [[file:task.org][task.org]], szkopuły w [[file:dev.org][dev.org]] (po angielsku bo coś mi
   do głowy strzeliło).
 
   Source kod w plikach ~*.c~ i ~*.h~. W ~tests/~ moje przyrządy do testowania. Do tego trochę
@@ -19,7 +21,7 @@
 ***** /Na dzień 27.03.2021 projekt można uznać za wyszedły z fazy \delta/
       
 ** RIDMI z ~main.c~   
-*** Wierszarz, Grzegorz Cichosz, marzec 2021
+***** Wierszarz, Grzegorz Cichosz, marzec 2021
 
 *** RIDMI
     Program dzieli się na kilka kroków i zagnieżdżonych podkroków. Te główne są dość dobrze wyróżnione
@@ -85,6 +87,8 @@
 ***** katalog ~tests/~ z testami
       mojego autorstwa ~podobnawe_wiersze~ oraz plik ~failloc.h~ do testów zachowania programu w
       razie błędu krytycznego (tj. braku pamięci)
+
+      Prócz tego korzystałem z testów spółdzielczych [[https://gitlab.com/mimuw-ipp-2021/male-zadanie][z tego repozytorium]]
 
 ***** ~sync~ i ~tarruj~
       dwa proste shell scripty, jeden do wrzucania na students, a drugi do tworzenia pliku smoła.gz
