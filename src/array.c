@@ -8,9 +8,9 @@
 
 /**
  * Nowa poszerzona długość dla tablicy (alokacja z zapasem). */
-static inline size_t new_len(size_t new_len)
+static inline size_t new_len(size_t new_size)
 {
-  return new_len * ARRAY_RESIZE;
+  return new_size * ARRAY_RESIZE;
 }
 
 void array_append(void* p, size_t width, void* new_el)
