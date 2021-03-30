@@ -10,7 +10,10 @@
  * o porządku między elementami -- quasi leksykograficznie porządkuję.
  * Wyjątek: cmp_pline_stable nigdy nie zwraca równości ponieważ chodzi w nim
  * o zachowanie porządku indeksów w grupie -- jeśli podobne są wiersze 1, 3 i 5,
- * to byłoby naszym życzeniem, aby w tej kolejności były w naszym outpucie */
+ * to byłoby naszym życzeniem, aby w tej kolejności były w naszym outpucie.
+ * Takie fajne komparacje typu `(a > b) - (a < b)` wziąłem stąd:
+ * https://www.gnu.org/software/libc/manual/html_node/Comparison-Functions.html
+ * */
 
 /**
  * Funkcja porównujące dwie liczby a i b całkowite typu Whole.
