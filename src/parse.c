@@ -10,10 +10,14 @@
 #include "array.h"
 #include "parse.h"
 
-/* stałe: zakres akceptowalnych znaków ascii + whitespace */
+/* stałe: zakres akceptowalnych znaków ascii, whitespace oraz znaczniki kluczowe
+ * dla systemów liczbowych będących przedmiotem naszych rozważań*/
 #define MIN_WORD_ASCII 33
 #define MAX_WORD_ASCII 126
 #define WHITE " \t\n\v\f\r"
+
+#define OCT_MARKER '0'
+#define HEX_MARKER 'x'
 
 static ParsedLine init_pline(size_t line_num);
 static void free_line(ParsedLine line);
@@ -95,8 +99,9 @@ static bool parse_whole(ParsedLine* pline, const char* s)
   else {
     num.abs = strtoull(s, &err, 0);
 
-    /* liczba 09 przez strtoull jest traktowana jako ósemkowa (zwraca dlań 0) */
-    if (s[0] == '0' && *err != '\0')
+    /* liczba zaczynające się od 0 są przez strtoull traktowane jako ósemkowe
+     * nawet jeśli po nich następują cyfry >=8, zwraca dla nich błędnie 0 */
+    if (s[0] == OCT_MARKER && *err != '\0')
       num.abs = strtoull(s, &err, 10);
   }
 
@@ -141,7 +146,8 @@ static bool parse_real(ParsedLine* pline, const char* s)
    * wcześniej parse_whole nie ustawił ostrzeżenia. Do tego: strtod nie ma opcji
    * specyfikacji systemu liczb, zatem hexy 0x... +0x... -0x... muszę ręcznie
    * odrzucać po małpiemu (+ w ifie upewniam się co do bezpiecznosci s[2]) */
-  if (errno == ERANGE || s[1] == 'x' || (s[1] != '\0' && s[2] == 'x'))
+  if (errno == ERANGE || s[1] == HEX_MARKER || (s[1] != '\0' &&
+      s[2] == HEX_MARKER))
     return false;
 
   errno = 0;

@@ -10,6 +10,8 @@
 /**
  * Modulik do wczytywania. */
 
+#define COMMENT_MARKER '#'
+
 /**
  *  Wczytywanie z stdinu aż do '\n' lub eofa
  *  line_ptr bufor do zapisywania linijek,
@@ -29,7 +31,7 @@ static ssize_t read_line(char** line_ptr, size_t* line_size, bool* is_eof,
     return EOF;
   }
 
-  if ((*is_comment = c == '#')) {
+  if ((*is_comment = c == COMMENT_MARKER)) {
     /* w przypadku komentarza nie chcemy ładować linii do getline'a, więc
      * jedziemy aż do końca linii */
     while (!feof(stdin) && getc(stdin) != '\n');
