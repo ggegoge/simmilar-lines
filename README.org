@@ -19,7 +19,8 @@
       Tj. działa i uelegantniony podział na katalogi i moduły. perhaps finalna wersja, ale nzając
       moją nerwicę natręctw to jeszcze wiele będę grzebać
 ***** /Na dzień 27.03.2021 projekt można uznać za wyszedły z fazy \delta/
-      
+***** Na dzień *1.04.2021* projekt można uznać za zakończony (faza \omega ?)
+      Zakończony. 3h temu wysłałem na moodle'a.
 ** RIDMI z ~main.c~   
 ***** Wierszarz, Grzegorz Cichosz, marzec 2021
 
