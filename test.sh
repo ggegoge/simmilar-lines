@@ -89,7 +89,7 @@ for f in "$dir"/*.in; do
 
     # test pamięci, strasznie powolny. ustawi exit code na 123 w razie błędu
     valgrind --leak-check=full --error-exitcode=123 --exit-on-first-error=yes \
-             --errors-for-leak-kinds=all --quiet \
+             --errors-for-leak-kinds=all --show-leak-kinds=all --quiet \
              "$real_prog" <"$f" >/dev/null 2>&1
     
     if [ $? -eq 123 ]; then
