@@ -1,26 +1,13 @@
 #+OPTIONS: toc:nil
 
-* Wierszarz
+* Simmilar Lines (/pol. Wierszarz/)
   
-  Małe zadanie z *IPP 2021* na MIMuwku.
+  *Individual Programming Task  2021* small task at the university of Warsaw.
   
-  Polecenie w pliku [[file:task.org][task.org]], szkopuły w [[file:dev.org][dev.org]] (po angielsku bo coś mi
-  do głowy strzeliło).
+  Task description in the [[file:task.org][task.org]] file (in Polish).
 
-  Source kod w plikach ~*.c~ i ~*.h~. W ~tests/~ moje przyrządy do testowania. Do tego trochę
-  narzędzi moich jak [[file:sync][sync]] i [[file:tarruj][tarruj]] czyli dwa skrypciki -- jeden synchronizuje z serwerem wszystko, a
-  drugi tworzy smołę (tar.gz) Obydwa biorą pliki wymienione w zakładce *struktura*
+  Furher polish description of the project below.  
 
-***** /Na dzień 17.03 projekt można uznać za wyszednięty z fazy \alpha./
-      Tj. działa.
-***** /Na dzień 21.03.2021 projekt można uznać za wyszedły z fazy \beta/
-      Tj. działa, elegancki zapis, wszystko git /wydaje się/
-***** /Na dzień 23.03.2021 projekt można uznać za wyszedły z fazy \gamma/
-      Tj. działa i uelegantniony podział na katalogi i moduły. perhaps finalna wersja, ale nzając
-      moją nerwicę natręctw to jeszcze wiele będę grzebać
-***** /Na dzień 27.03.2021 projekt można uznać za wyszedły z fazy \delta/
-***** Na dzień *1.04.2021* projekt można uznać za zakończony (faza \omega ?)
-      Zakończony. 3h temu wysłałem na moodle'a.
 ** RIDMI z ~main.c~   
 ***** Wierszarz, Grzegorz Cichosz, marzec 2021
 
@@ -46,11 +33,11 @@
 
        ---------------------   
 ** Opis szczegółowszy
-*** użycie
+*** Use
     Kompilacja za pomocą ~make~.
 
 *** struktura
-
+    
 **** Pliki źródłowe
      Wszystkie składuję w katalogu ~src~
 ***** ~array~ -- tablice dynamiczne
@@ -95,3 +82,4 @@
       dwa proste shell scripty, jeden do wrzucania na students, a drugi do tworzenia pliku smoła.gz
       z rozwiązaniem
 
+      
