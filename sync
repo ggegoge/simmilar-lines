@@ -1,5 +1,0 @@
-#!/bin/bash
-
-# synchronizacja z serwerem
-
-rsync -a -m --exclude-from=.tarignore . mimuw:~/test/wierszarz
